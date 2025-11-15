@@ -1,0 +1,22 @@
+name: New MCP server
+version: 0.0.1
+schema: v1
+mcpServers:
+  # Each item in the list starts with a hyphen (-)
+  - name: filesystem
+    description: "Provides secure, AI-controlled access to the project file system."
+    type: stdio
+    command: "npx"
+    args:
+      - "@modelcontextprotocol/server-filesystem"
+      #- "--working-directory"
+      - "."
+
+  #- name: cli
+  #  description: "Allows the AI to run general CLI commands."
+  #  type: stdio
+  #  command: "npx"
+  #  args:
+  #    - "@mcp-use/cli"
+  #    - "--working-directory"
+  #    - "."

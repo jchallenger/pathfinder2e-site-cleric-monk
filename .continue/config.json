@@ -1,0 +1,94 @@
+{
+  "models": [
+    {
+      "title": "Llama 3.2 3B",
+      "provider": "ollama",
+      "model": "llama3.2:3b",
+      "apiBase": "http://100.1.100.201:11434"
+    },
+    {
+      "title": "Llama 3.2 1B",
+      "provider": "ollama",
+      "model": "llama3.2:1b",
+      "apiBase": "http://100.1.100.201:11434"
+    }
+  ],
+  "tabAutocompleteModel": {
+    "title": "Llama 3.2 1B Autocomplete",
+    "provider": "ollama",
+    "model": "llama3.2:1b",
+    "apiBase": "http://100.1.100.201:11434"
+  },
+  "embeddingsProvider": {
+    "provider": "ollama",
+    "model": "nomic-embed-text",
+    "apiBase": "http://100.1.100.201:11434"
+  },
+  "reranker": {
+    "name": "llm",
+    "params": {
+      "modelTitle": "Llama 3.2 3B"
+    }
+  },
+  "contextProviders": [
+    {
+      "name": "code",
+      "params": {}
+    },
+    {
+      "name": "docs",
+      "params": {}
+    },
+    {
+      "name": "diff",
+      "params": {}
+    },
+    {
+      "name": "terminal",
+      "params": {}
+    },
+    {
+      "name": "problems",
+      "params": {}
+    },
+    {
+      "name": "folder",
+      "params": {}
+    },
+    {
+      "name": "codebase",
+      "params": {}
+    }
+  ],
+  "slashCommands": [
+    {
+      "name": "edit",
+      "description": "Edit selected code"
+    },
+    {
+      "name": "comment",
+      "description": "Write comments for the selected code"
+    },
+    {
+      "name": "share",
+      "description": "Export the current chat session to markdown"
+    },
+    {
+      "name": "cmd",
+      "description": "Generate a shell command"
+    },
+    {
+      "name": "commit",
+      "description": "Generate a git commit message"
+    }
+  ],
+  "customCommands": [
+    {
+      "name": "test",
+      "prompt": "Write a comprehensive test suite for the selected code. Follow best practices for the language/framework being used.",
+      "description": "Generate tests for selected code"
+    }
+  ],
+  "allowAnonymousTelemetry": false,
+  "docs": []
+}
