@@ -20,9 +20,6 @@
 # Build plugin for cache
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    # Enable caching
-    cache = true
 
 # Headers for security and performance
 [[headers]]

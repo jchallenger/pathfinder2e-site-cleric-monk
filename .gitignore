@@ -44,3 +44,6 @@ playwright/.cache/
 !.continue/README.md
 !.continue/QUICK_START.md
 !.continue/mcpServers/
+
+# Local Netlify folder
+.netlify
