@@ -1084,6 +1084,36 @@ export const pathfinderRules = {
         source: "Player Core pg. 264",
         url: "https://2e.aonprd.com/Feats.aspx?ID=794",
         traits: ["General"]
+      },
+      untrainedImprovisation: {
+        name: "Untrained Improvisation",
+        level: 3,
+        type: "General",
+        prerequisites: [],
+        description: "Your proficiency bonus to untrained skill checks is equal to your level –2. This improves to your level –1 at 5th level and your full level at 7th level. This doesn't allow you to use the skill's trained actions.",
+        source: "Player Core pg. 264",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=5233",
+        traits: ["General"]
+      },
+      robustHealth: {
+        name: "Robust Health",
+        level: 3,
+        type: "General",
+        prerequisites: [],
+        description: "Your physiology responds well to first aid. You gain a circumstance bonus to the number of Hit Points you regain equal to your level from a successful attempt to Treat your Wounds or use Battle Medicine on you. Additionally, after you or an ally use Battle Medicine on you, you become temporarily immune to additional Battle Medicine for 1 hour instead of 1 day.",
+        source: "Player Core 2 pg. 233",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=6499",
+        traits: ["General"]
+      },
+      fleet: {
+        name: "Fleet",
+        level: 1,
+        type: "General",
+        prerequisites: [],
+        description: "Your Speed increases by 5 feet.",
+        source: "Player Core pg. 263",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=784",
+        traits: ["General"]
       }
     },
     skill: {
@@ -1098,6 +1128,28 @@ export const pathfinderRules = {
         traits: ["General", "Skill"],
         skill: "Intimidation"
       },
+      quickJump: {
+        name: "Quick Jump",
+        level: 1,
+        type: "Skill (Athletics)",
+        prerequisites: ["trained in Athletics"],
+        description: "You can use High Jump and Long Jump as a single action instead of 2 actions. If you do, you don't perform the initial Stride (nor do you fail if you don't Stride 10 feet).",
+        source: "Player Core pg. 260",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=825",
+        traits: ["General", "Skill"],
+        skill: "Athletics"
+      },
+      riskySurgery: {
+        name: "Risky Surgery",
+        level: 1,
+        type: "Skill (Medicine)",
+        prerequisites: ["trained in Medicine"],
+        description: "Your surgery can bring a patient back from the brink of death, but might push them over the edge. When you Treat Wounds, you can deal 1d8 slashing damage to your patient just before applying the effects of Treat Wounds. If you do, you gain a +2 circumstance bonus to your Medicine check to Treat Wounds, and if you roll a success, you get a critical success instead.",
+        source: "Player Core 2 pg. 233",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=2146",
+        traits: ["General", "Skill"],
+        skill: "Medicine"
+      },
       battleMedicine: {
         name: "Battle Medicine",
         level: 1,
@@ -1110,6 +1162,17 @@ export const pathfinderRules = {
         skill: "Medicine",
         actions: "1 action"
       },
+      continualRecovery: {
+        name: "Continual Recovery",
+        level: 2,
+        type: "Skill (Medicine)",
+        prerequisites: ["expert in Medicine"],
+        description: "You zealously monitor a patient's progress to administer treatment faster. When you Treat Wounds, your patient becomes immune for only 10 minutes instead of 1 hour. This applies only to your Treat Wounds activities, not any other the patient receives.",
+        source: "Player Core pg. 254",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=5137",
+        traits: ["General", "Skill"],
+        skill: "Medicine"
+      },
       assurance: {
         name: "Assurance",
         level: 1,
@@ -1119,6 +1182,72 @@ export const pathfinderRules = {
         source: "Player Core pg. 258",
         url: "https://2e.aonprd.com/Feats.aspx?ID=756",
         traits: ["Fortune", "General", "Skill"]
+      },
+      advancedFirstAid: {
+        name: "Advanced First Aid",
+        level: 7,
+        type: "Skill (Medicine)",
+        prerequisites: ["master in Medicine"],
+        description: "When you use Medicine to Administer First Aid, instead of Stabilizing a character or Stopping Bleeding, you can reduce an ally's frightened or sickened condition by 2, or remove either of those conditions entirely on a critical success. You can remove only one condition at a time. The DC for the check is usually the DC of the effect that caused the condition.",
+        source: "Player Core pg. 252",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=2107",
+        traits: ["General", "Healing", "Manipulate", "Skill"],
+        skill: "Medicine"
+      },
+      quickSwim: {
+        name: "Quick Swim",
+        level: 7,
+        type: "Skill (Athletics)",
+        prerequisites: ["master in Athletics"],
+        description: "You Swim 5 feet farther on a success and 10 feet farther on a critical success, to a maximum of your Speed. If you're legendary in Athletics, you gain a swim Speed equal to your Speed.",
+        source: "Player Core pg. 260",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=829",
+        traits: ["General", "Skill"],
+        skill: "Athletics"
+      },
+      planarSurvival: {
+        name: "Planar Survival",
+        level: 7,
+        type: "Skill (Survival)",
+        prerequisites: ["master in Survival"],
+        description: "You can Subsist using Survival on different planes, even those without resources or natural phenomena you normally need. For instance, you can forage for food even if the plane lacks food that could normally sustain you. A successful Survival check to Subsist on a plane prevents you and the creatures you care for from taking damage from the plane's environment, unless that plane lacks the default surface, air, and gravity or there's a specific hazard or trap that deals this damage.",
+        source: "Player Core pg. 259",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=819",
+        traits: ["General", "Skill"],
+        skill: "Survival"
+      },
+      legendaryMedic: {
+        name: "Legendary Medic",
+        level: 15,
+        type: "Skill (Medicine)",
+        prerequisites: ["legendary in Medicine"],
+        description: "You've discovered medical breakthroughs or techniques that achieve miraculous results. Once per day for each target, you can spend 1 hour treating that target and attempt a Medicine check to remove a disease or the blinded, deafened, doomed, or drained condition. Use the DC of the disease or of the spell or effect that created the condition. If the effect's source is an artifact, above 20th level, or similarly powerful, increase the DC by 10.",
+        source: "Player Core pg. 257",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=803",
+        traits: ["General", "Skill"],
+        skill: "Medicine"
+      },
+      cloudJump: {
+        name: "Cloud Jump",
+        level: 15,
+        type: "Skill (Athletics)",
+        prerequisites: ["legendary in Athletics"],
+        description: "Your unparalleled athletic skill allows you to jump impossible distances. Triple the distance you Long Jump (so you could jump 90 feet on a successful DC 30 check). When you High Jump, use the calculation for a Long Jump but don't triple the distance. You can jump a distance greater than your Speed by spending additional actions when you Long Jump or High Jump. For every extra action spent, add your Speed to the limit on how far you can jump.",
+        source: "Player Core pg. 253",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=767",
+        traits: ["General", "Skill"],
+        skill: "Athletics"
+      },
+      legendarySurvivalist: {
+        name: "Legendary Survivalist",
+        level: 15,
+        type: "Skill (Survival)",
+        prerequisites: ["legendary in Survival"],
+        description: "You can survive indefinitely without food or water and can endure severe, extreme, and incredible cold and heat without taking damage from doing so.",
+        source: "Player Core pg. 258",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=808",
+        traits: ["General", "Skill"],
+        skill: "Survival"
       }
     },
     cleric: {
@@ -1153,6 +1282,16 @@ export const pathfinderRules = {
         url: "https://2e.aonprd.com/Feats.aspx?ID=1926",
         traits: ["Cleric"]
       },
+      versatileFont: {
+        name: "Versatile Font",
+        level: 2,
+        type: "Cleric",
+        prerequisites: ["harmful font or healing font", "deity that allows clerics to have both fonts"],
+        description: "As you explore your deity's aspects, you move beyond restrictions on healing or harming. You can prepare either harm or heal in the spell slots gained from the harmful font or healing font.",
+        source: "Player Core pg. 115",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=275",
+        traits: ["Cleric"]
+      },
       channelSmite: {
         name: "Channel Smite",
         level: 4,
@@ -1163,6 +1302,100 @@ export const pathfinderRules = {
         url: "https://2e.aonprd.com/Feats.aspx?ID=1927",
         traits: ["Cleric", "Concentrate"],
         actions: "2 actions"
+      },
+      divineInfusion: {
+        name: "Divine Infusion",
+        level: 4,
+        type: "Cleric",
+        prerequisites: [],
+        description: "You pour energy into the subject of your healing to empower its attacks. If the next action you use is to cast harm or heal to restore Hit Points to a single creature, the target deals an additional 1d6 damage of the spell's type (void for harm, vitality for heal) with its melee weapons and unarmed attacks until the end of its next turn. If the spell's rank is 5th or higher, increase this to 2d6, and if the spell is 8th rank or higher, increase it to 3d6.",
+        source: "Player Core pg. 116",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=4657",
+        traits: ["Cleric", "Concentrate", "Spellshape"],
+        actions: "1 action"
+      },
+      selectiveEnergy: {
+        name: "Selective Energy",
+        level: 6,
+        type: "Cleric",
+        prerequisites: [],
+        description: "When you cast a version of harm or heal that has an area, you can designate up to 5 creatures in the area that are not targeted by the spell.",
+        source: "Player Core pg. 117",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=283",
+        traits: ["Cleric"]
+      },
+      zealousRush: {
+        name: "Zealous Rush",
+        level: 8,
+        type: "Cleric",
+        prerequisites: [],
+        description: "You bless yourself on the move. Stride up to 10 feet. If the spell took 2 or more actions, you can Stride up to your full Speed instead.",
+        source: "Player Core pg. 118",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=4674",
+        traits: ["Cleric"],
+        actions: "reaction",
+        trigger: "You cast a divine spell that takes 1 action or more to cast and that affects only you or your equipment"
+      },
+      replenishmentOfWar: {
+        name: "Replenishment of War",
+        level: 10,
+        type: "Cleric",
+        prerequisites: ["expert proficiency in your deity's favored weapon"],
+        description: "Striking out against your enemies draws praise and protection from your deity. When you damage a creature with a Strike using your deity's favored weapon, you gain a number of temporary Hit Points equal to half your level, or equal to your level if the Strike was a critical hit. These temporary Hit Points last until the start of your next turn.",
+        source: "Player Core pg. 118",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=293",
+        traits: ["Cleric"]
+      },
+      defensiveRecovery: {
+        name: "Defensive Recovery",
+        level: 12,
+        type: "Cleric",
+        prerequisites: [],
+        description: "Your faith provides temporary protection in addition to healing. If the next action you use is to cast harm or heal on a single target and the target regains Hit Points from the spell, it also gains a +2 status bonus to AC and saving throws for 1 round.",
+        source: "Player Core pg. 119",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=294",
+        traits: ["Cleric", "Concentrate", "Spellshape"],
+        actions: "1 action"
+      },
+      fastChannel: {
+        name: "Fast Channel",
+        level: 14,
+        type: "Cleric",
+        prerequisites: ["harmful font or healing font"],
+        description: "Divine power is always at your fingertips, swiftly responding to your call. When you cast harm or heal by spending 2 actions, you can get the effects of the 3-action version instead. You can do this with harm if you have harmful font or heal if you have healing font (or both if you have Versatile Font).",
+        source: "Player Core pg. 119",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=300",
+        traits: ["Cleric"]
+      },
+      eternalBlessing: {
+        name: "Eternal Blessing",
+        level: 16,
+        type: "Cleric",
+        prerequisites: ["holy"],
+        description: "You are perpetually surrounded by a bless spell. The spell has a spell rank equal to half your level rounded up and a 15-foot radius, which you can't increase. You can Dismiss the spell; if you do, it returns automatically after 1 minute.",
+        source: "Player Core pg. 120",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=303",
+        traits: ["Cleric"]
+      },
+      inviolable: {
+        name: "Inviolable",
+        level: 18,
+        type: "Cleric",
+        prerequisites: [],
+        description: "The divine grace that surrounds you makes you difficult to harm. You gain resistance 3 to all damage. At 20th level, this increases to resistance 5.",
+        source: "Player Core pg. 120",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=2002",
+        traits: ["Cleric"]
+      },
+      makerOfMiracles: {
+        name: "Maker of Miracles",
+        level: 20,
+        type: "Cleric",
+        prerequisites: ["miraculous spell"],
+        description: "You are a conduit for truly deific power. You gain an additional 10th-rank spell slot.",
+        source: "Player Core pg. 121",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=309",
+        traits: ["Cleric"]
       }
     },
     minotaur: {
@@ -1199,6 +1432,17 @@ export const pathfinderRules = {
       }
     },
     dragonblood: {
+      breathOfTheDragon: {
+        name: "Breath of the Dragon",
+        level: 1,
+        type: "Ancestry (Dragonblood)",
+        prerequisites: ["Dragonblood versatile heritage"],
+        description: "You tap into your draconic physiology to exhale a torrent of energy in either a 15-foot cone or a 30-foot line, dealing 1d4 damage. Each creature in the area must attempt a basic saving throw against the higher of your class DC or spell DC. You can't use Breath of the Dragon again for 1d4 rounds. At 3rd level and every 2 levels thereafter, the damage increases by 1d4. The shape of the breath, the damage type, and the saving throw match those of your draconic exemplar.",
+        source: "Player Core 2 pg. 45",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=5730",
+        traits: ["Dragonblood", "Magical"],
+        actions: "2 actions"
+      },
       dragonbloodParagon: {
         name: "Dragonblood Paragon",
         level: 3,
@@ -1209,6 +1453,18 @@ export const pathfinderRules = {
         url: "https://2e.aonprd.com/Feats.aspx?ID=2387",
         traits: ["Dragonblood"]
       },
+      dragonsFlight: {
+        name: "Dragon's Flight",
+        level: 5,
+        type: "Ancestry (Dragonblood)",
+        prerequisites: ["Dragonblood versatile heritage"],
+        description: "You have grown a small pair of draconic wings or have honed your use of the wings you've had since birth. You can Fly, and if you don't normally have a fly Speed, you gain a fly Speed of 20 feet for this movement. However, if you aren't on solid ground at the end of this movement, you fall.",
+        source: "Player Core 2 pg. 46",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=5738",
+        traits: ["Dragonblood"],
+        actions: "1 action",
+        frequency: "once per round"
+      },
       wyrmscaledKobold: {
         name: "Wyrmscaled",
         level: 5,
@@ -1217,6 +1473,36 @@ export const pathfinderRules = {
         description: "Draconic scales cover parts of your body. You gain a +1 circumstance bonus to AC against attacks from dragons, and if you're also unarmored, you gain a +1 circumstance bonus to AC against all other attacks as well.",
         source: "Howl of the Wild pg. 39",
         url: "https://2e.aonprd.com/Feats.aspx?ID=2390",
+        traits: ["Dragonblood"]
+      },
+      trueDragonsFlight: {
+        name: "True Dragon's Flight",
+        level: 9,
+        type: "Ancestry (Dragonblood)",
+        prerequisites: ["Dragon's Flight"],
+        description: "Your draconic wings have grown more powerful, capable of keeping you aloft at all times. You gain a fly Speed of 20 feet at all times.",
+        source: "Player Core 2 pg. 47",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=5741",
+        traits: ["Dragonblood"]
+      },
+      formidableBreath: {
+        name: "Formidable Breath",
+        level: 13,
+        type: "Ancestry (Dragonblood)",
+        prerequisites: ["Breath of the Dragon"],
+        description: "Thanks to rigorous breathing exercises and a diet similar to that of your lineage, your magical breath is more powerful. The area of your Breath of the Dragon increases to 30 feet for a cone or 60 feet for a line, and the damage dice are d6s instead of d4s.",
+        source: "Player Core 2 pg. 47",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=5740",
+        traits: ["Dragonblood"]
+      },
+      lingeringBreath: {
+        name: "Lingering Breath",
+        level: 17,
+        type: "Ancestry (Dragonblood)",
+        prerequisites: ["Breath of the Dragon"],
+        description: "Your draconic breath destroys the environment and leaves enemies in pain. When you use Breath of the Dragon, the area becomes difficult terrain for 1 minute. Creatures who fail or critically fail their saving throw against your Breath of the Dragon take 2d6 persistent damage of the same type as the breath weapon.",
+        source: "Player Core 2 pg. 47",
+        url: "https://2e.aonprd.com/Feats.aspx?ID=5746",
         traits: ["Dragonblood"]
       }
     }
