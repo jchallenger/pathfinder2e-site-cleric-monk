@@ -2,10 +2,92 @@
   "permissions": {
     "allow": [
       "Bash(node test-ui.js:*)",
+      "Bash(node src/characterFunctions.test.js:*)",
+      "Bash(npm run:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nConfigure environment variables for Ollama API\n\nChanges:\n- Simplified netlify.toml (removed unnecessary plugins)\n- Created .env for local development (LAN IP)\n- Created .env.example as template\n- Updated App.jsx to use VITE_OLLAMA_API_URL env variable\n- Updated CSP headers for ollama.challengers.tech domain\n- Fallback to LAN IP if env var not set\n\nLocal dev: http://100.1.100.201:11434\nProduction: https://ollama.challengers.tech\n\n🤖 Generated with Claude Code\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Read(*.md)",
+      "Read(src/**)",
+      "Edit(src/**)",
+      "Write(*.md)"
     ],
-    "deny": [],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Write(.env)"
+    ],
     "ask": []
-  }
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write(src/.*\\.jsx?)|Edit(src/.*\\.jsx?)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '✓ JavaScript file modified. Run tests with: npm run test'",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write(src/characterFunctions\\.js)|Edit(src/characterFunctions\\.js)|Write(src/characterConfig\\.js)|Edit(src/characterConfig\\.js)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && node src/characterFunctions.test.js",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Write(src/pathfinderRules\\.js)|Edit(src/pathfinderRules\\.js)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '⚠️  Updated pathfinderRules.js - Verify all sources link to Archives of Nethys'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '📋 Pathfinder 2e Character Tracker | Review CLAUDE.md for project guidelines'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "contextDocs": [
+    {
+      "name": "Project Guidelines",
+      "path": "CLAUDE.md",
+      "description": "Complete project documentation including PF2e rules, testing requirements, and development workflow"
+    },
+    {
+      "name": "Build Analysis",
+      "path": "BUILD_ANALYSIS.md",
+      "description": "Level 20 character build analysis with all feats and ability scores"
+    },
+    {
+      "name": "Equipment Progression",
+      "path": "EQUIPMENT_PROGRESSION.md",
+      "description": "Equipment and rune recommendations by level (1-20)"
+    },
+    {
+      "name": "Archives of Nethys",
+      "url": "https://2e.aonprd.com",
+      "description": "Official Pathfinder 2e reference - use for rules verification"
+    }
+  ],
+  "mcpServers": {},
+  "customInstructions": "This is a Pathfinder 2e character sheet application. ALWAYS verify rules against pathfinderRules.js and Archives of Nethys before making changes. Run tests after modifying character calculation logic. Add tooltips with source attribution for any new stats. Follow the quality checklist in CLAUDE.md before completing tasks."
 }

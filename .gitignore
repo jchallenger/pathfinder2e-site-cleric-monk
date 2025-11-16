@@ -45,5 +45,14 @@ playwright/.cache/
 !.continue/QUICK_START.md
 !.continue/mcpServers/
 
+# Claude Code (track configuration, ignore runtime data)
+.claude/cache/
+.claude/.session/
+
+# Keep Claude Code configuration files
+!.claude/settings.local.json
+!.claude/settings.json
+!.claude/README.md
+
 # Local Netlify folder
 .netlify

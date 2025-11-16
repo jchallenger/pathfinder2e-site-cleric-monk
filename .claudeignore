@@ -1,0 +1,96 @@
+# Claude Code Ignore File
+# Excludes files/directories from Claude Code context to reduce token usage
+# Similar to .gitignore but for AI context
+
+# Dependencies
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+
+# Environment variables (already in .gitignore, but explicit here)
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing artifacts
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+screenshot*.png
+
+# Logs
+*.log
+logs/
+
+# Cache directories
+.cache/
+.temp/
+.tmp/
+*.cache
+
+# Continue extension (separate from Claude Code)
+.continue/cache/
+.continue/index/
+
+# Netlify
+.netlify/
+
+# Lock files (large, not needed for context)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Large data files (if any)
+*.sqlite
+*.db
+*.sql
+
+# Compiled assets (can be regenerated)
+assets/
+
+# Git internals (not needed for code context)
+.git/
+
+# OS files
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Documentation images (if stored locally)
+# *.png
+# *.jpg
+# *.jpeg
+# *.gif
+# (Commented out - may need images for context in some cases)
+
+# Keep important docs for context:
+# !CLAUDE.md
+# !BUILD_ANALYSIS.md
+# !EQUIPMENT_PROGRESSION.md
+# !CHARACTER_AUDIT.md
+# !COMPLIANCE_FIXES.md
+# !RULES_CACHE_SUMMARY.md
