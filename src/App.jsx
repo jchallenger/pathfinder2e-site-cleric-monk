@@ -243,7 +243,7 @@ function searchEquipmentDatabase(query) {
 // AI Storytelling API function
 async function generateStoryLog(prompt, characterContext) {
   try {
-    const apiUrl = 'http://100.1.100.201:11434/v1/chat/completions';
+    const apiUrl = `${import.meta.env.VITE_OLLAMA_API_URL || 'http://100.1.100.201:11434'}/v1/chat/completions`;
 
     console.log('Generating story log for:', prompt);
 

@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node test-ui.js:*)"
+      "Bash(node test-ui.js:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nConfigure environment variables for Ollama API\n\nChanges:\n- Simplified netlify.toml (removed unnecessary plugins)\n- Created .env for local development (LAN IP)\n- Created .env.example as template\n- Updated App.jsx to use VITE_OLLAMA_API_URL env variable\n- Updated CSP headers for ollama.challengers.tech domain\n- Fallback to LAN IP if env var not set\n\nLocal dev: http://100.1.100.201:11434\nProduction: https://ollama.challengers.tech\n\n🤖 Generated with Claude Code\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
