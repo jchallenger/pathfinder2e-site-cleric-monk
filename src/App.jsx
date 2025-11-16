@@ -2147,7 +2147,7 @@ function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, 
   const spellAttack = wisMod + spellProf;
   // get divineFontChoice from localstorage
   const divineFontChoice = localStorage.getItem('divineFontChoice') || 'harm';
-  // Divine spell list for Achaekek Warpriest
+  // Divine spell list for Irori Warpriest
   const divineSpells = {
     cantrips: [
       { id: 'divine-lance', name: 'Divine Lance', actions: 2, desc: 'Ranged spell attack, 1d4+spellcasting mod damage (good, evil, lawful, or chaotic)' },
@@ -2161,13 +2161,13 @@ function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, 
       { id: 'bless', name: 'Bless', actions: 2, desc: '+1 status bonus to attack rolls for allies in 15-foot emanation' },
       { id: 'command', name: 'Command', actions: 2, desc: 'Force creature to follow one-word command (approach, drop, flee, grovel, halt)' },
       { id: 'fear', name: 'Fear', actions: 2, desc: 'Target becomes frightened 1 (frightened 2 on crit fail)' },
-      { id: 'sure-strike', name: 'Sure Strike', actions: 1, desc: 'Make attack roll twice, use better result (Achaekek spell)' },
+      { id: 'jump', name: 'Jump', actions: 2, desc: 'Target gains +10 foot status bonus to jump distance (Irori cleric spell)' },
       { id: 'sanctuary', name: 'Sanctuary', actions: 2, desc: 'Attackers must succeed Will save or choose different target' },
       { id: 'heal', name: 'Heal', actions: '1-3', desc: '1d8+8 HP (1 action: touch; 2 actions: 30 ft; 3 actions: 30-ft burst)' },
-      { id: 'harm', name: 'Harm', actions: '1-3', desc: '1d8+8 negative damage (Divine Font - Achaekek)' }
+      { id: 'harm', name: 'Harm', actions: '1-3', desc: '1d8+8 void damage to living or heal undead (Versatile Font)' }
     ],
     rank2: [
-      { id: 'invisibility', name: 'Invisibility', actions: 2, desc: 'Target becomes invisible (Achaekek spell)' },
+      { id: 'invisibility', name: 'Invisibility', actions: 2, desc: 'Target becomes invisible until they attack' },
       { id: 'spiritual-weapon', name: 'Spiritual Weapon', actions: 2, desc: 'Summon floating weapon that Strikes each round' },
       { id: 'silence', name: 'Silence', actions: 2, desc: 'Create 10-foot burst of magical silence' },
       { id: 'see-invisibility', name: 'See Invisibility', actions: 2, desc: 'See invisible creatures and objects' }
@@ -2175,10 +2175,11 @@ function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, 
     rank3: [
       { id: 'blindness', name: 'Blindness', actions: 2, desc: 'Make target blinded' },
       { id: 'crisis-of-faith', name: 'Crisis of Faith', actions: 2, desc: 'Target becomes confused or stupefied' },
-      { id: 'heroism', name: 'Heroism', actions: 2, desc: '+1 status bonus to attack rolls, saves, and skill checks' }
+      { id: 'heroism', name: 'Heroism', actions: 2, desc: '+1 status bonus to attack rolls, saves, and skill checks' },
+      { id: 'haste', name: 'Haste', actions: 2, desc: 'Target is quickened and gains extra action (Irori cleric spell)' }
     ],
     rank4: [
-      { id: 'vision-of-death', name: 'Vision of Death', actions: 2, desc: 'Show creature vision of their death (Achaekek spell)' },
+      { id: 'stoneskin', name: 'Stoneskin', actions: 2, desc: 'Target gains resistance 5 to physical damage (Irori cleric spell)' },
       { id: 'freedom-of-movement', name: 'Freedom of Movement', actions: 2, desc: 'Target ignores difficult terrain and immobilization' },
       { id: 'air-walk', name: 'Air Walk', actions: 2, desc: 'Walk on air as if solid ground' }
     ],
@@ -2206,7 +2207,7 @@ function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, 
               Divine Spells
             </h2>
             <p className="text-slate-300 text-sm mt-1">
-              Warpriest of Achaekek • Spell DC {spellDC} • Spell Attack +{spellAttack}
+              Warpriest of Irori • Spell DC {spellDC} • Spell Attack +{spellAttack}
             </p>
           </div>
           <button
