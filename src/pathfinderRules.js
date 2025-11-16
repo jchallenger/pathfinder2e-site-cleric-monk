@@ -781,6 +781,47 @@ export const pathfinderRules = {
         moderateCurse: "Red Mantis assassin tasked with eliminating the cursed character",
         majorCurse: "Instant death with soul sealed against resurrection"
       }
+    },
+    irori: {
+      name: "Irori",
+      title: "Master of Masters",
+      source: "Player Core 2, https://2e.aonprd.com/Deities.aspx?ID=10",
+      category: "Core Deities",
+      alignment: "Lawful Neutral",
+      areasOfConcern: ["History", "Knowledge", "Self-perfection"],
+      edicts: [
+        "Be humble",
+        "Help others perfect themselves",
+        "Hone your body, mind, and spirit to a high degree of perfection"
+      ],
+      anathema: [
+        "Become addicted to a substance",
+        "Destroy an important historical text",
+        "Repeatedly fail to maintain self-control"
+      ],
+      divineAttribute: ["Strength", "Wisdom"],
+      divineFont: "Harm or Heal", // Versatile Font
+      divineSanctification: "None",
+      divineSkill: "Athletics",
+      favoredWeapon: "Fist (unarmed strikes)",
+      domains: ["Knowledge", "Might", "Perfection", "Truth"],
+      alternateDomains: ["Ambition", "Change"],
+      clericSpells: {
+        1: "Jump",
+        3: "Haste",
+        4: "Stoneskin"
+      },
+      sacredAnimal: "Snail",
+      sacredColors: ["Blue", "White"],
+      religiousSymbol: "Open blue palm",
+      divineIntercession: {
+        minorBoon: "+2 circumstance bonus on saves against mental effects",
+        moderateBoon: "Perfect mental clarity - automatically succeed at concentration checks",
+        majorBoon: "True self-mastery - once per day, automatically succeed at a save with a critical success",
+        minorCurse: "-4 status penalty to Will saves",
+        moderateCurse: "Body betrays you - roll twice on physical ability checks and take the lower result",
+        majorCurse: "Mind and body in conflict - cannot perform any action that requires thought and physical ability simultaneously"
+      }
     }
   },
 

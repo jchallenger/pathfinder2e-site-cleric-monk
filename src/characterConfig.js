@@ -13,6 +13,17 @@ export const CHARACTER_IDENTITY = {
   gender: 'Male',
   alignment: 'Neutral',
 
+  // Deity
+  deity: {
+    name: 'Irori',
+    title: 'Master of Masters',
+    url: 'https://2e.aonprd.com/Deities.aspx?ID=10',
+    alignment: 'Lawful Neutral',
+    favoredWeapon: 'Fist (unarmed strikes)',
+    divineFont: 'Versatile', // Can choose Heal OR Harm daily
+    divineSkill: 'Athletics'
+  },
+
   // Core character building blocks
   ancestry: {
     name: 'Minotaur',
@@ -512,6 +523,22 @@ export const EQUIPMENT_DATABASE = {
       price: { gp: 30 },
       level: 2,
       description: 'Heavy armor providing maximum protection'
+    },
+    'lattice-armor': {
+      name: 'Lattice Armor',
+      category: 'armor',
+      armorType: 'medium',
+      acBonus: 4,
+      dexCap: 2,
+      checkPenalty: -2,
+      speedPenalty: -5,
+      strength: 14,
+      bulk: 2,
+      group: 'composite',
+      traits: [],
+      price: { gp: 45 },
+      level: 5,
+      description: 'Intricate medium armor made of interlocking metal plates that provides excellent protection while maintaining flexibility'
     }
   },
 
@@ -555,6 +582,19 @@ export const EQUIPMENT_DATABASE = {
       price: { gp: 10 },
       level: 0,
       description: 'Large shield providing cover (+2 circumstance bonus to AC when raised, can take cover action)'
+    },
+    'salvo-shield': {
+      name: 'Salvo Shield',
+      category: 'shield',
+      acBonus: 2,
+      hardness: 6,
+      hp: 24,
+      bt: 12,
+      bulk: 1,
+      traits: ['attached-to-crossbow-or-firearm'],
+      price: { gp: 20 },
+      level: 1,
+      description: 'Special shield with integrated weapon mount. Can be used for reactions even while wielding a weapon'
     }
   },
 
@@ -603,6 +643,21 @@ export const EQUIPMENT_DATABASE = {
       price: { gp: 6 },
       level: 0,
       description: 'Ranged weapon for long-distance combat'
+    },
+    'handwraps-of-mighty-blows': {
+      name: 'Handwraps of Mighty Blows',
+      category: 'weapon',
+      weaponType: 'unarmed',
+      hands: 0,
+      damage: '1d6',
+      damageType: 'bludgeoning',
+      traits: ['unarmed', 'invested'],
+      bulk: 'L',
+      group: 'brawling',
+      price: { gp: 4 },
+      level: 2,
+      description: 'Magical wraps that enhance unarmed strikes and can hold runes',
+      special: 'Allows you to etch fundamental and property runes onto your unarmed attacks'
     }
   },
 
@@ -638,6 +693,21 @@ export const EQUIPMENT_DATABASE = {
       level: 10,
       description: 'Grants +2 item bonus to attack rolls'
     },
+    'weapon-potency-3': {
+      name: '+3 Weapon Potency Rune',
+      category: 'rune',
+      runeType: 'weapon-potency',
+      bonus: 3,
+      appliesTo: 'weapon',
+      statModifiers: {
+        attackBonus: 3,
+        damageBonus: 0
+      },
+      bulk: 0,
+      price: { gp: 20560 },
+      level: 16,
+      description: 'Grants +3 item bonus to attack rolls'
+    },
     'striking': {
       name: 'Striking Rune',
       category: 'rune',
@@ -666,6 +736,20 @@ export const EQUIPMENT_DATABASE = {
       level: 12,
       description: 'Weapon deals two additional weapon damage dice'
     },
+    'major-striking': {
+      name: 'Major Striking Rune',
+      category: 'rune',
+      runeType: 'weapon-striking',
+      bonus: 3,
+      appliesTo: 'weapon',
+      statModifiers: {
+        damageDice: '+3d' // Adds 3 extra weapon damage dice
+      },
+      bulk: 0,
+      price: { gp: 31065 },
+      level: 19,
+      description: 'Weapon deals three additional weapon damage dice (4 dice total)'
+    },
     'armor-potency-1': {
       name: '+1 Armor Potency Rune',
       category: 'rune',
@@ -680,6 +764,34 @@ export const EQUIPMENT_DATABASE = {
       level: 5,
       description: 'Grants +1 item bonus to AC'
     },
+    'armor-potency-2': {
+      name: '+2 Armor Potency Rune',
+      category: 'rune',
+      runeType: 'armor-potency',
+      bonus: 2,
+      appliesTo: 'armor',
+      statModifiers: {
+        acBonus: 2
+      },
+      bulk: 0,
+      price: { gp: 1060 },
+      level: 11,
+      description: 'Grants +2 item bonus to AC'
+    },
+    'armor-potency-3': {
+      name: '+3 Armor Potency Rune',
+      category: 'rune',
+      runeType: 'armor-potency',
+      bonus: 3,
+      appliesTo: 'armor',
+      statModifiers: {
+        acBonus: 3
+      },
+      bulk: 0,
+      price: { gp: 20560 },
+      level: 18,
+      description: 'Grants +3 item bonus to AC'
+    },
     'resilient': {
       name: 'Resilient Rune',
       category: 'rune',
@@ -693,6 +805,50 @@ export const EQUIPMENT_DATABASE = {
       price: { gp: 340 },
       level: 8,
       description: 'Grants +1 item bonus to all saving throws'
+    },
+    'greater-resilient': {
+      name: 'Greater Resilient Rune',
+      category: 'rune',
+      runeType: 'armor-resilient',
+      bonus: 2,
+      appliesTo: 'armor',
+      statModifiers: {
+        savingThrowBonus: 2
+      },
+      bulk: 0,
+      price: { gp: 3440 },
+      level: 14,
+      description: 'Grants +2 item bonus to all saving throws'
+    },
+    'major-resilient': {
+      name: 'Major Resilient Rune',
+      category: 'rune',
+      runeType: 'armor-resilient',
+      bonus: 3,
+      appliesTo: 'armor',
+      statModifiers: {
+        savingThrowBonus: 3
+      },
+      bulk: 0,
+      price: { gp: 49440 },
+      level: 20,
+      description: 'Grants +3 item bonus to all saving throws'
+    },
+    'supreme-reinforcing': {
+      name: 'Supreme Reinforcing Rune',
+      category: 'rune',
+      runeType: 'shield-reinforcing',
+      bonus: 3,
+      appliesTo: 'shield',
+      statModifiers: {
+        hardness: 15,
+        hpBonus: 96,
+        btBonus: 48
+      },
+      bulk: 0,
+      price: { gp: 54000 },
+      level: 20,
+      description: 'Shield gains +15 hardness, +96 HP, +48 BT. Can use reactions even when using shield'
     }
   },
 
