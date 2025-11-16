@@ -447,6 +447,12 @@ export default function MinotaurCampaignTracker() {
     };
   });
 
+  // Divine font choice state (for Versatile Font feat)
+  const [divineFontChoice, setDivineFontChoice] = useState(() => {
+    const saved = localStorage.getItem('divine-font-choice');
+    return saved || 'heal'; // Default to 'heal', can be 'heal' or 'harm'
+  });
+
   // Character avatar state
   const [avatarUrl, setAvatarUrl] = useState(() => {
     const saved = localStorage.getItem('character-avatar');
@@ -533,6 +539,10 @@ export default function MinotaurCampaignTracker() {
   useEffect(() => {
     localStorage.setItem('cast-spells', JSON.stringify(castSpells));
   }, [castSpells]);
+
+  useEffect(() => {
+    localStorage.setItem('divine-font-choice', divineFontChoice);
+  }, [divineFontChoice]);
 
   useEffect(() => {
     localStorage.setItem('selected-feats', JSON.stringify(selectedFeats));
@@ -2216,12 +2226,12 @@ function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, 
         </div>
       </div>
 
-      {/* Divine Font - Healing Font */}
-      <div className="bg-green-900/20 rounded-lg p-4 border border-green-700">
+      {/* Divine Font - Healing/Harmful Font */}
+      <div className={`${divineFontChoice === 'heal' ? 'bg-green-900/20 border-green-700' : 'bg-purple-900/20 border-purple-700'} rounded-lg p-4 border`}>
         <div className="flex items-center justify-between mb-3">
-          <div>
-            <h3 className="text-lg font-bold text-green-300 flex items-center gap-2">
-              Divine Font: Heal
+          <div className="flex-1">
+            <h3 className={`text-lg font-bold ${divineFontChoice === 'heal' ? 'text-green-300' : 'text-purple-300'} flex items-center gap-2`}>
+              Divine Font: {divineFontChoice === 'heal' ? 'Heal' : 'Harm'}
               <a
                 href="https://2e.aonprd.com/Classes.aspx?ID=5"
                 target="_blank"
@@ -2233,26 +2243,52 @@ function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, 
               </a>
             </h3>
             <p className="text-slate-300 text-xs">
-              Healing Font: Can cast heal {fontSlots}×/day at current spell rank
-              <br />
-              <span className="text-xs text-slate-400">Source: Player Core pg. 112</span>
+              {CHARACTER_IDENTITY.deity.divineFont === 'Versatile' ? (
+                <>
+                  Versatile Font: Can prepare {fontSlots}× {divineFontChoice} spells per day
+                  <br />
+                  <span className="text-xs text-slate-400">Source: Versatile Font feat (Player Core pg. 115)</span>
+                </>
+              ) : (
+                <>
+                  Healing Font: Can cast heal {fontSlots}×/day at current spell rank
+                  <br />
+                  <span className="text-xs text-slate-400">Source: Player Core pg. 112</span>
+                </>
+              )}
             </p>
+            {CHARACTER_IDENTITY.deity.divineFont === 'Versatile' && (
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={() => setDivineFontChoice('heal')}
+                  className={`px-3 py-1 rounded text-sm ${divineFontChoice === 'heal' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-400'}`}
+                >
+                  Heal
+                </button>
+                <button
+                  onClick={() => setDivineFontChoice('harm')}
+                  className={`px-3 py-1 rounded text-sm ${divineFontChoice === 'harm' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-400'}`}
+                >
+                  Harm
+                </button>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => uncastSpell('divineFont')}
-              className="px-2 py-1 bg-green-700 hover:bg-green-800 rounded text-sm"
+              className={`px-2 py-1 ${divineFontChoice === 'heal' ? 'bg-green-700 hover:bg-green-800' : 'bg-purple-700 hover:bg-purple-800'} rounded text-sm`}
               disabled={castSpells.divineFont === 0}
             >
               -
             </button>
             <div className="text-lg font-bold">
-              <span className="text-green-400">{fontSlots - castSpells.divineFont}</span>
+              <span className={divineFontChoice === 'heal' ? 'text-green-400' : 'text-purple-400'}>{fontSlots - castSpells.divineFont}</span>
               <span className="text-slate-400"> / {fontSlots}</span>
             </div>
             <button
               onClick={() => castSpell('divineFont')}
-              className="px-2 py-1 bg-green-700 hover:bg-green-800 rounded text-sm"
+              className={`px-2 py-1 ${divineFontChoice === 'heal' ? 'bg-green-700 hover:bg-green-800' : 'bg-purple-700 hover:bg-purple-800'} rounded text-sm`}
               disabled={castSpells.divineFont >= fontSlots}
             >
               Cast
@@ -2263,12 +2299,16 @@ function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, 
           {Array.from({ length: fontSlots }).map((_, i) => (
             <div
               key={i}
-              className={`h-2 flex-1 rounded ${i < fontSlots - castSpells.divineFont ? 'bg-green-500' : 'bg-slate-700'}`}
+              className={`h-2 flex-1 rounded ${i < fontSlots - castSpells.divineFont ? (divineFontChoice === 'heal' ? 'bg-green-500' : 'bg-purple-500') : 'bg-slate-700'}`}
             />
           ))}
         </div>
         <div className="mt-3 p-2 bg-slate-700/50 rounded text-xs text-slate-300">
-          <strong>Heal Spell:</strong> Restore hit points to living creatures. Can be cast at your highest spell rank ({maxRanks > 0 ? `Rank ${Math.min(maxRanks, 10)}` : 'Rank 1'}).
+          {divineFontChoice === 'heal' ? (
+            <><strong>Heal Spell:</strong> Restore hit points to living creatures. Can be cast at your highest spell rank ({maxRanks > 0 ? `Rank ${Math.min(maxRanks, 10)}` : 'Rank 1'}).</>
+          ) : (
+            <><strong>Harm Spell:</strong> Deal void damage to living creatures or heal undead. Can be cast at your highest spell rank ({maxRanks > 0 ? `Rank ${Math.min(maxRanks, 10)}` : 'Rank 1'}).</>
+          )}
         </div>
       </div>
 
