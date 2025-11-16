@@ -511,6 +511,13 @@ export default function MinotaurCampaignTracker() {
     setMounted(true);
   }, []);
 
+  // Initialize divine font choice in localStorage if not set
+  useEffect(() => {
+    if (!localStorage.getItem('divine-font-choice')) {
+      localStorage.setItem('divine-font-choice', 'heal');
+    }
+  }, []);
+
   // Save to localStorage
   useEffect(() => {
     localStorage.setItem('character-level', level.toString());
@@ -1028,7 +1035,7 @@ export default function MinotaurCampaignTracker() {
   ];
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden">
+    <div className="relative min-h-screen w-full">
       {/* Background - absolutely positioned to fill screen */}
       <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 -z-10"></div>
 
@@ -2127,6 +2134,9 @@ function CombatTab({ level }) {
     </div>
   );
 }
+function setDivineFontChoice(choice) {
+  localStorage.setItem('divineFontChoice', choice);
+}
 
 function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, restSpells, togglePreparedSpell }) {
   const wisScore = getAbilityScore(BASE_ABILITY_SCORES.WIS, 'WIS', level);
@@ -2135,7 +2145,8 @@ function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, 
   const spellProf = getProficiencyBonus(level, spellRank);
   const spellDC = 10 + wisMod + spellProf;
   const spellAttack = wisMod + spellProf;
-
+  // get divineFontChoice from localstorage
+  const divineFontChoice = localStorage.getItem('divineFontChoice') || 'harm';
   // Divine spell list for Achaekek Warpriest
   const divineSpells = {
     cantrips: [
