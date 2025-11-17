@@ -2548,7 +2548,7 @@ function Tooltip({ children, content, placement = 'auto' }) {
 
   // Get position classes based on calculated position
   const getPositionClasses = () => {
-    const baseClasses = "absolute z-50 p-3 sm:p-4 bg-slate-800 border-2 border-purple-500 rounded-lg shadow-2xl text-xs sm:text-sm cursor-move";
+    const baseClasses = "absolute z-[9999] p-3 sm:p-4 bg-slate-800 border-2 border-purple-500 rounded-lg shadow-2xl text-xs sm:text-sm cursor-move";
     const widthClasses = "w-[calc(100vw-2rem)] max-w-xs sm:max-w-sm md:w-80";
 
     switch (position) {
@@ -2614,7 +2614,48 @@ function SpellCard({ spell, isCantrip, preparedCount, onTogglePrepare, onAddAnot
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h4 className="font-semibold text-white">{spell.name}</h4>
+              <Tooltip content={
+                <>
+                  <div className="font-semibold text-purple-300 mb-2">{spell.name}</div>
+                  <div className="space-y-2 text-slate-300">
+                    <div className="bg-slate-700/50 p-2 rounded">
+                      <div className="text-sm">
+                        <strong>Actions:</strong> {spell.actions} {spell.actions === 1 ? 'action' : 'actions'}
+                      </div>
+                      {spell.rank && (
+                        <div className="text-sm mt-1">
+                          <strong>Rank:</strong> {spell.rank}
+                        </div>
+                      )}
+                      {spell.traditions && (
+                        <div className="text-sm mt-1">
+                          <strong>Traditions:</strong> {spell.traditions}
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-slate-700/50 p-2 rounded">
+                      <div className="text-sm">
+                        <strong>Description:</strong> {spell.desc}
+                      </div>
+                      {spell.heightening && (
+                        <div className="text-sm mt-2">
+                          <strong>Heightening:</strong> {spell.heightening}
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-purple-900/50 p-2 rounded border border-purple-600">
+                      <div className="text-xs text-slate-400">
+                        Source: Player Core
+                      </div>
+                    </div>
+                  </div>
+                </>
+              }>
+                <div className="cursor-help inline-flex items-center gap-1">
+                  <h4 className="font-semibold text-white">{spell.name}</h4>
+                  <Info className="w-3.5 h-3.5 text-purple-400 hover:text-purple-300" />
+                </div>
+              </Tooltip>
               <span className="text-xs bg-slate-600 px-2 py-0.5 rounded">{spell.actions} {spell.actions === 1 ? 'action' : 'actions'}</span>
               {isPrepared && (
                 <span className="text-xs bg-purple-600 px-2 py-0.5 rounded">
