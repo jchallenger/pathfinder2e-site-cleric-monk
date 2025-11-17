@@ -2147,46 +2147,46 @@ function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, 
   // Divine spell list for Irori Warpriest
   const divineSpells = {
     cantrips: [
-      { id: 'divine-lance', name: 'Divine Lance', actions: 2, desc: 'Ranged spell attack, 1d4+spellcasting mod damage (good, evil, lawful, or chaotic)' },
-      { id: 'shield', name: 'Shield', actions: 1, desc: '+1 circumstance bonus to AC, can use Shield Block reaction' },
-      { id: 'guidance', name: 'Guidance', actions: 2, desc: 'Target gains +1 status bonus to one check' },
-      { id: 'detect-magic', name: 'Detect Magic', actions: 2, desc: 'Detect magical auras in 30-foot emanation' },
-      { id: 'light', name: 'Light', actions: 2, desc: 'Make object shed bright light in 20-foot radius' },
-      { id: 'stabilize', name: 'Stabilize', actions: 2, desc: 'Automatically stabilize dying creature' }
+      { id: 'divine-lance', name: 'Divine Lance', actions: 2, desc: 'Ranged spell attack, 1d4+spellcasting mod damage (good, evil, lawful, or chaotic)', url: 'https://2e.aonprd.com/Spells.aspx?ID=84' },
+      { id: 'shield', name: 'Shield', actions: 1, desc: '+1 circumstance bonus to AC, can use Shield Block reaction', url: 'https://2e.aonprd.com/Spells.aspx?ID=586' },
+      { id: 'guidance', name: 'Guidance', actions: 2, desc: 'Target gains +1 status bonus to one check', url: 'https://2e.aonprd.com/Spells.aspx?ID=142' },
+      { id: 'detect-magic', name: 'Detect Magic', actions: 2, desc: 'Detect magical auras in 30-foot emanation', url: 'https://2e.aonprd.com/Spells.aspx?ID=66' },
+      { id: 'light', name: 'Light', actions: 2, desc: 'Make object shed bright light in 20-foot radius', url: 'https://2e.aonprd.com/Spells.aspx?ID=171' },
+      { id: 'stabilize', name: 'Stabilize', actions: 2, desc: 'Automatically stabilize dying creature', url: 'https://2e.aonprd.com/Spells.aspx?ID=307' }
     ],
     rank1: [
-      { id: 'bless', name: 'Bless', actions: 2, desc: '+1 status bonus to attack rolls for allies in 15-foot emanation' },
-      { id: 'command', name: 'Command', actions: 2, desc: 'Force creature to follow one-word command (approach, drop, flee, grovel, halt)' },
-      { id: 'fear', name: 'Fear', actions: 2, desc: 'Target becomes frightened 1 (frightened 2 on crit fail)' },
-      { id: 'jump', name: 'Jump', actions: 2, desc: 'Target gains +10 foot status bonus to jump distance (Irori cleric spell)' },
-      { id: 'sanctuary', name: 'Sanctuary', actions: 2, desc: 'Attackers must succeed Will save or choose different target' },
-      { id: 'heal', name: 'Heal', actions: '1-3', desc: '1d8+8 HP (1 action: touch; 2 actions: 30 ft; 3 actions: 30-ft burst)' },
-      { id: 'harm', name: 'Harm', actions: '1-3', desc: '1d8+8 void damage to living or heal undead (Versatile Font)' }
+      { id: 'bless', name: 'Bless', actions: 2, desc: '+1 status bonus to attack rolls for allies in 15-foot emanation', url: 'https://2e.aonprd.com/Spells.aspx?ID=25' },
+      { id: 'command', name: 'Command', actions: 2, desc: 'Force creature to follow one-word command (approach, drop, flee, grovel, halt)', url: 'https://2e.aonprd.com/Spells.aspx?ID=45' },
+      { id: 'fear', name: 'Fear', actions: 2, desc: 'Target becomes frightened 1 (frightened 2 on crit fail)', url: 'https://2e.aonprd.com/Spells.aspx?ID=110' },
+      { id: 'jump', name: 'Jump', actions: 2, desc: 'Target gains +10 foot status bonus to jump distance (Irori cleric spell)', url: 'https://2e.aonprd.com/Spells.aspx?ID=167' },
+      { id: 'sanctuary', name: 'Sanctuary', actions: 2, desc: 'Attackers must succeed Will save or choose different target', url: 'https://2e.aonprd.com/Spells.aspx?ID=266' },
+      { id: 'heal', name: 'Heal', actions: '1-3', desc: '1d8+8 HP (1 action: touch; 2 actions: 30 ft; 3 actions: 30-ft burst)', url: 'https://2e.aonprd.com/Spells.aspx?ID=148', heightening: 'Increases healing by 1d8 per rank' },
+      { id: 'harm', name: 'Harm', actions: '1-3', desc: '1d8+8 void damage to living or heal undead (Versatile Font)', url: 'https://2e.aonprd.com/Spells.aspx?ID=146', heightening: 'Increases damage by 1d8 per rank' }
     ],
     rank2: [
-      { id: 'invisibility', name: 'Invisibility', actions: 2, desc: 'Target becomes invisible until they attack' },
-      { id: 'spiritual-weapon', name: 'Spiritual Weapon', actions: 2, desc: 'Summon floating weapon that Strikes each round' },
-      { id: 'silence', name: 'Silence', actions: 2, desc: 'Create 10-foot burst of magical silence' },
-      { id: 'see-invisibility', name: 'See Invisibility', actions: 2, desc: 'See invisible creatures and objects' }
+      { id: 'invisibility', name: 'Invisibility', actions: 2, desc: 'Target becomes invisible until they attack', url: 'https://2e.aonprd.com/Spells.aspx?ID=164' },
+      { id: 'spiritual-weapon', name: 'Spiritual Weapon', actions: 2, desc: 'Summon floating weapon that Strikes each round', url: 'https://2e.aonprd.com/Spells.aspx?ID=306' },
+      { id: 'silence', name: 'Silence', actions: 2, desc: 'Create 10-foot burst of magical silence', url: 'https://2e.aonprd.com/Spells.aspx?ID=287' },
+      { id: 'see-invisibility', name: 'See Invisibility', actions: 2, desc: 'See invisible creatures and objects', url: 'https://2e.aonprd.com/Spells.aspx?ID=271' }
     ],
     rank3: [
-      { id: 'blindness', name: 'Blindness', actions: 2, desc: 'Make target blinded' },
-      { id: 'crisis-of-faith', name: 'Crisis of Faith', actions: 2, desc: 'Target becomes confused or stupefied' },
-      { id: 'heroism', name: 'Heroism', actions: 2, desc: '+1 status bonus to attack rolls, saves, and skill checks' },
-      { id: 'haste', name: 'Haste', actions: 2, desc: 'Target is quickened and gains extra action (Irori cleric spell)' }
+      { id: 'blindness', name: 'Blindness', actions: 2, desc: 'Make target blinded', url: 'https://2e.aonprd.com/Spells.aspx?ID=26' },
+      { id: 'crisis-of-faith', name: 'Crisis of Faith', actions: 2, desc: 'Target becomes confused or stupefied', url: 'https://2e.aonprd.com/Spells.aspx?ID=55' },
+      { id: 'heroism', name: 'Heroism', actions: 2, desc: '+1 status bonus to attack rolls, saves, and skill checks', url: 'https://2e.aonprd.com/Spells.aspx?ID=149' },
+      { id: 'haste', name: 'Haste', actions: 2, desc: 'Target is quickened and gains extra action (Irori cleric spell)', url: 'https://2e.aonprd.com/Spells.aspx?ID=147' }
     ],
     rank4: [
-      { id: 'stoneskin', name: 'Stoneskin', actions: 2, desc: 'Target gains resistance 5 to physical damage (Irori cleric spell)' },
-      { id: 'freedom-of-movement', name: 'Freedom of Movement', actions: 2, desc: 'Target ignores difficult terrain and immobilization' },
-      { id: 'air-walk', name: 'Air Walk', actions: 2, desc: 'Walk on air as if solid ground' }
+      { id: 'stoneskin', name: 'Stoneskin', actions: 2, desc: 'Target gains resistance 5 to physical damage (Irori cleric spell)', url: 'https://2e.aonprd.com/Spells.aspx?ID=308' },
+      { id: 'freedom-of-movement', name: 'Freedom of Movement', actions: 2, desc: 'Target ignores difficult terrain and immobilization', url: 'https://2e.aonprd.com/Spells.aspx?ID=128' },
+      { id: 'air-walk', name: 'Air Walk', actions: 2, desc: 'Walk on air as if solid ground', url: 'https://2e.aonprd.com/Spells.aspx?ID=6' }
     ],
     rank5: [
-      { id: 'divine-wrath', name: 'Divine Wrath', actions: 2, desc: 'Deal 4d10 damage + enfeebled to enemies of chosen alignment' },
-      { id: 'flame-strike', name: 'Flame Strike', actions: 2, desc: '8d6 damage (half fire, half divine) in 10-foot burst' }
+      { id: 'divine-wrath', name: 'Divine Wrath', actions: 2, desc: 'Deal 4d10 damage + enfeebled to enemies of chosen alignment', url: 'https://2e.aonprd.com/Spells.aspx?ID=86' },
+      { id: 'flame-strike', name: 'Flame Strike', actions: 2, desc: '8d6 damage (half fire, half divine) in 10-foot burst', url: 'https://2e.aonprd.com/Spells.aspx?ID=120' }
     ],
     rank6: [
-      { id: 'blade-barrier', name: 'Blade Barrier', actions: 2, desc: 'Create wall of spinning blades that deals 7d8 slashing' },
-      { id: 'repulsion', name: 'Repulsion', actions: 2, desc: 'Push creatures away in 30-foot emanation' }
+      { id: 'blade-barrier', name: 'Blade Barrier', actions: 2, desc: 'Create wall of spinning blades that deals 7d8 slashing', url: 'https://2e.aonprd.com/Spells.aspx?ID=24' },
+      { id: 'repulsion', name: 'Repulsion', actions: 2, desc: 'Push creatures away in 30-foot emanation', url: 'https://2e.aonprd.com/Spells.aspx?ID=254' }
     ]
   };
 
@@ -2647,6 +2647,18 @@ function SpellCard({ spell, isCantrip, preparedCount, onTogglePrepare, onAddAnot
                       <div className="text-xs text-slate-400">
                         Source: Player Core
                       </div>
+                      {spell.url && (
+                        <div className="text-xs mt-1">
+                          <a
+                            href={spell.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-purple-400 hover:text-purple-300 inline-flex items-center gap-1"
+                          >
+                            View on Archives of Nethys <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </>
