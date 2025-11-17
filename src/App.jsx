@@ -1296,6 +1296,8 @@ export default function MinotaurCampaignTracker() {
               uncastSpell={uncastSpell}
               restSpells={restSpells}
               togglePreparedSpell={togglePreparedSpell}
+              divineFontChoice={divineFontChoice}
+              setDivineFontChoice={setDivineFontChoice}
             />
           )}
           {activeTab === 'feats' && (
@@ -2134,19 +2136,14 @@ function CombatTab({ level }) {
     </div>
   );
 }
-function setDivineFontChoice(choice) {
-  localStorage.setItem('divineFontChoice', choice);
-}
 
-function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, restSpells, togglePreparedSpell }) {
+function SpellsTab({ level, preparedSpells, castSpells, castSpell, uncastSpell, restSpells, togglePreparedSpell, divineFontChoice, setDivineFontChoice }) {
   const wisScore = getAbilityScore(BASE_ABILITY_SCORES.WIS, 'WIS', level);
   const wisMod = getModifier(wisScore);
   const spellRank = level >= 11 ? 'expert' : 'trained';
   const spellProf = getProficiencyBonus(level, spellRank);
   const spellDC = 10 + wisMod + spellProf;
   const spellAttack = wisMod + spellProf;
-  // get divineFontChoice from localstorage
-  const divineFontChoice = localStorage.getItem('divineFontChoice') || 'harm';
   // Divine spell list for Irori Warpriest
   const divineSpells = {
     cantrips: [
@@ -3169,8 +3166,8 @@ function ProgressionTab({ level }) {
       unlocked: true,
       feats: [
         { name: "Shield Block", type: "General", source: "Player Core pg. 266", url: "https://2e.aonprd.com/Feats.aspx?ID=839" },
-        { name: "Deadly Simplicity", type: "Doctrine", source: "Player Core pg. 118", url: "https://2e.aonprd.com/Classes.aspx?ID=5" },
-        { name: "Intimidating Glare", type: "Skill", source: "Player Core pg. 260", url: "https://2e.aonprd.com/Feats.aspx?ID=796" },
+        { name: "Deadly Simplicity", type: "Doctrine", source: "Player Core pg. 118", url: "https://2e.aonprd.com/Feats.aspx?ID=4642" },
+        { name: "Intimidating Glare", type: "Background", source: "Player Core pg. 260", url: "https://2e.aonprd.com/Feats.aspx?ID=796" },
         { name: "Dragonblood", type: "Heritage", source: "Player Core 2 pg. 44", url: "https://2e.aonprd.com/Heritages.aspx?ID=368" },
         { name: "Breath of the Dragon", type: "Ancestry", source: "Player Core 2 pg. 44", url: "https://2e.aonprd.com/Feats.aspx?ID=4365" }
       ],
@@ -3206,7 +3203,7 @@ function ProgressionTab({ level }) {
         { name: "Battle Medicine", type: "Skill", source: "Player Core pg. 258", url: "https://2e.aonprd.com/Feats.aspx?ID=760" },
         { name: "Divine Infusion", type: "Class", source: "Player Core pg. 122", url: "https://2e.aonprd.com/Feats.aspx?ID=2943" }
       ],
-      features: []
+      features: ["Skill Increase"]
     },
     {
       level: 5,
@@ -3223,7 +3220,7 @@ function ProgressionTab({ level }) {
         { name: "Continual Recovery", type: "Skill", source: "Player Core pg. 259", url: "https://2e.aonprd.com/Feats.aspx?ID=771" },
         { name: "Magic Hands", type: "Class", source: "Player Core pg. 124", url: "https://2e.aonprd.com/Feats.aspx?ID=2948" }
       ],
-      features: []
+      features: ["Skill Increase"]
     },
     {
       level: 7,
@@ -3231,7 +3228,7 @@ function ProgressionTab({ level }) {
       feats: [
         { name: "Robust Health", type: "General", source: "Player Core pg. 266", url: "https://2e.aonprd.com/Feats.aspx?ID=843" }
       ],
-      features: ["Rank 4 spells", "Will Save Expert", "Divine Spellcasting Expert", "Skill Increase"]
+      features: ["Rank 4 spells", "Skill Increase", "Expert with simple/martial/unarmed/favored weapon (Warpriest)", "Critical Specialization with favored weapon (Warpriest)"]
     },
     {
       level: 8,
@@ -3240,7 +3237,7 @@ function ProgressionTab({ level }) {
         { name: "Risky Surgery", type: "Skill", source: "Player Core pg. 264", url: "https://2e.aonprd.com/Feats.aspx?ID=813" },
         { name: "Zealous Rush", type: "Class", source: "Player Core pg. 126", url: "https://2e.aonprd.com/Feats.aspx?ID=2958" }
       ],
-      features: []
+      features: ["Skill Increase"]
     },
     {
       level: 9,
@@ -3249,9 +3246,8 @@ function ProgressionTab({ level }) {
         { name: "True Dragon's Flight", type: "Ancestry", source: "Player Core 2 pg. 45", url: "https://2e.aonprd.com/Feats.aspx?ID=4369" }
       ],
       features: [
-        "5th-rank spells unlock",
+        "Rank 5 spells",
         "Resolute Faith - Will saves become Master, success→crit success",
-        "Ancestry Feat",
         "Skill Increase"
       ]
     },
@@ -3262,7 +3258,7 @@ function ProgressionTab({ level }) {
         { name: "Advanced First Aid", type: "Skill", source: "Player Core pg. 257", url: "https://2e.aonprd.com/Feats.aspx?ID=755" },
         { name: "Replenishment of War", type: "Class", source: "Player Core pg. 125", url: "https://2e.aonprd.com/Feats.aspx?ID=293" }
       ],
-      features: ["Rank 6 spells", "Ability Boosts (STR, DEX, CON, WIS)", "Skill Increase"]
+      features: ["Ability Boosts (STR, DEX, CON, WIS)", "Skill Increase"]
     },
     {
       level: 11,
@@ -3270,7 +3266,7 @@ function ProgressionTab({ level }) {
       feats: [
         { name: "Toughness", type: "General", source: "Player Core pg. 267", url: "https://2e.aonprd.com/Feats.aspx?ID=848" }
       ],
-      features: ["Rank 6 spells", "Perception Master", "Fortitude Save Master", "Skill Increase"]
+      features: ["Rank 6 spells", "Reflex Save Expert", "Spell attack/DC becomes Expert (Warpriest)", "Skill Increase"]
     },
     {
       level: 12,
@@ -3279,7 +3275,7 @@ function ProgressionTab({ level }) {
         { name: "Quick Swim", type: "Skill", source: "Player Core pg. 263", url: "https://2e.aonprd.com/Feats.aspx?ID=810" },
         { name: "Defensive Recovery", type: "Class", source: "Player Core pg. 122", url: "https://2e.aonprd.com/Feats.aspx?ID=265" }
       ],
-      features: []
+      features: ["Skill Increase"]
     },
     {
       level: 13,
@@ -3287,7 +3283,7 @@ function ProgressionTab({ level }) {
       feats: [
         { name: "Goring Charge", type: "Ancestry", source: "Howl of the Wild", url: "https://2e.aonprd.com/Feats.aspx?ID=5372" }
       ],
-      features: ["Rank 7 spells", "Armor Expert (medium/light)", "Weapon Specialization (+2 damage)", "Reflex Save Expert", "Skill Increase"]
+      features: ["Rank 7 spells", "Armor Expert (medium/light) - Warpriest", "Weapon Specialization (+2 damage)", "Skill Increase"]
     },
     {
       level: 14,
@@ -3296,7 +3292,7 @@ function ProgressionTab({ level }) {
         { name: "Planar Survival", type: "Skill", source: "Player Core pg. 263", url: "https://2e.aonprd.com/Feats.aspx?ID=806" },
         { name: "Fast Channel", type: "Class", source: "Player Core pg. 122", url: "https://2e.aonprd.com/Feats.aspx?ID=267" }
       ],
-      features: []
+      features: ["Skill Increase"]
     },
     {
       level: 15,
@@ -3304,7 +3300,7 @@ function ProgressionTab({ level }) {
       feats: [
         { name: "Fleet", type: "General", source: "Player Core pg. 260", url: "https://2e.aonprd.com/Feats.aspx?ID=784" }
       ],
-      features: ["Rank 8 spells", "Ability Boosts (STR, DEX, CON, WIS)", "Divine Spellcasting Master", "Skill Increase"]
+      features: ["Rank 8 spells", "Ability Boosts (STR, DEX, CON, WIS)", "Divine Spellcasting Master", "Fortitude Save Master - success→crit success (Warpriest)", "Skill Increase"]
     },
     {
       level: 16,
@@ -3313,7 +3309,7 @@ function ProgressionTab({ level }) {
         { name: "Legendary Medic", type: "Skill", source: "Player Core pg. 261", url: "https://2e.aonprd.com/Feats.aspx?ID=798" },
         { name: "Eternal Blessing", type: "Class", source: "Player Core pg. 122", url: "https://2e.aonprd.com/Feats.aspx?ID=266" }
       ],
-      features: []
+      features: ["Skill Increase"]
     },
     {
       level: 17,
@@ -3321,7 +3317,7 @@ function ProgressionTab({ level }) {
       feats: [
         { name: "Lingering Breath", type: "Ancestry", source: "Player Core 2 pg. 45", url: "https://2e.aonprd.com/Feats.aspx?ID=4370" }
       ],
-      features: ["Rank 9 spells", "Perception Legendary", "Reflex Save Master", "Skill Increase"]
+      features: ["Rank 9 spells", "Skill Increase"]
     },
     {
       level: 18,
@@ -3330,7 +3326,7 @@ function ProgressionTab({ level }) {
         { name: "Cloud Jump", type: "Skill", source: "Player Core pg. 259", url: "https://2e.aonprd.com/Feats.aspx?ID=769" },
         { name: "Inviolable", type: "Class", source: "Player Core pg. 124", url: "https://2e.aonprd.com/Feats.aspx?ID=2947" }
       ],
-      features: []
+      features: ["Skill Increase"]
     },
     {
       level: 19,
@@ -3338,7 +3334,7 @@ function ProgressionTab({ level }) {
       feats: [
         { name: "Incredible Initiative", type: "General", source: "Player Core pg. 260", url: "https://2e.aonprd.com/Feats.aspx?ID=791" }
       ],
-      features: ["Rank 10 spells", "Divine Spellcasting Legendary", "Armor Master (medium/light)", "Weapons Legendary (simple/martial/unarmed)", "All Saves Legendary", "Miraculous Spell", "Weapon Specialization (+4)", "Skill Increase"]
+      features: ["Miraculous Spell (single 10th-rank slot)", "Master with favored weapon/spell attack/spell DC (Warpriest)", "Greater Weapon Specialization (+4 damage)", "Skill Increase"]
     },
     {
       level: 20,
@@ -3347,7 +3343,7 @@ function ProgressionTab({ level }) {
         { name: "Legendary Survivalist", type: "Skill", source: "Player Core pg. 265", url: "https://2e.aonprd.com/Feats.aspx?ID=833" },
         { name: "Maker of Miracles", type: "Class", source: "Player Core pg. 124", url: "https://2e.aonprd.com/Feats.aspx?ID=281" }
       ],
-      features: ["Ability Boosts (INT, CON, CHA, WIS)", "Armor Legendary (unarmored/light/medium)", "Divine Font: 6 slots"]
+      features: ["Ability Boosts (STR, DEX, CON, WIS)", "Skill Increase"]
     }
   ];
 
