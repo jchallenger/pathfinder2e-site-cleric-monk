@@ -1,7 +1,7 @@
 # Claude Agent Instructions for Talon Tracker
 
-**Last Updated**: 2025-11-09
-**Version**: Post-Migration v3.0 (Minotaur)
+**Last Updated**: 2025-11-19
+**Version**: Post-Migration v3.2 (PF2e Spell System + Pathbuilder Integration)
 
 ## Project Overview
 
@@ -32,15 +32,227 @@ Talon Tracker is a **Pathfinder 2e character sheet web application** for trackin
 ```
 talon-tracker/
 ├── src/
-│   ├── App.jsx                    # Main application (ALL UI + logic)
+│   ├── App.jsx                    # Main application & state management
+│   ├── NewSpellsTab.jsx           # PF2e-compliant spell system UI
 │   ├── pathfinderRules.js         # Official PF2e rules cache with URLs
 │   ├── main.jsx                   # React entry point
 │   └── index.css                  # Global Tailwind styles
 ├── test-ui.js                     # Playwright UI test suite
+├── test-spells-refactor.cjs       # Spell system comprehensive tests
+├── SPELL_PREPARATION_REVIEW.md    # Spell system refactor documentation
 ├── CHARACTER_AUDIT.md             # Pre-fix compliance audit
 ├── COMPLIANCE_FIXES.md            # Applied fixes documentation
 ├── RULES_CACHE_SUMMARY.md         # Rules cache documentation
 └── CLAUDE.md                      # This file (keep updated!)
+```
+
+---
+
+## ⚠️ CRITICAL: PF2e-Compliant Spell System
+
+**Status**: ✅ **FULLY COMPLIANT** (as of 2025-11-19)
+
+### How Prepared Spellcasting Works in PF2e
+
+**Source**: [Archives of Nethys - Prepared Spells](https://2e.aonprd.com/Rules.aspx?ID=271)
+
+The app now implements **official PF2e prepared spellcasting rules**:
+
+1. **Daily Preparation**:
+   - Each spell slot is filled with a SPECIFIC SPELL during preparation
+   - Same spell can be prepared multiple times (uses multiple slots)
+   - Example: 3 Rank-1 slots can all be filled with "Bless"
+
+2. **Casting Prepared Spells**:
+   - ✅ When you cast a spell, that **specific prepared instance is consumed**
+   - ❌ You **cannot** cast a spell you didn't prepare
+   - Each prepared instance is tracked with a unique ID
+
+3. **Rest & Re-preparation**:
+   - Rest clears all prepared spells (except cantrips)
+   - Must re-prepare spells for the new day
+   - Takes ~1 hour of daily preparation
+
+### Data Structure
+
+```javascript
+// App.jsx - State management
+const [preparedSpells, setPreparedSpells] = useState({
+  cantrips: [
+    { id: 'unique-id-1', spellId: 'divine-lance' },
+    { id: 'unique-id-2', spellId: 'shield' }
+  ],
+  rank1: [
+    { id: 'unique-id-3', spellId: 'bless' },
+    { id: 'unique-id-4', spellId: 'bless' },  // Same spell prepared twice
+    { id: 'unique-id-5', spellId: 'command' }
+  ]
+  // ... other ranks
+});
+```
+
+### Key Functions
+
+**`castSpell(rank, preparedInstanceId)`** - Removes specific prepared instance:
+```javascript
+const castSpell = (rank, preparedInstanceId) => {
+  setPreparedSpells(prev => ({
+    ...prev,
+    [rank]: prev[rank].filter(instance => instance.id !== preparedInstanceId)
+  }));
+};
+```
+
+**`togglePreparedSpell(rank, spellId)`** - Adds/removes ONE instance:
+```javascript
+// Adds new instance with unique ID
+{ id: `${spellId}-${Date.now()}-${random}`, spellId: spellId }
+```
+
+**`restSpells()`** - Clears all prepared spells (except cantrips):
+```javascript
+setPreparedSpells(prev => ({
+  cantrips: prev.cantrips,  // Cantrips stay prepared
+  rank1: [], rank2: [], // ... all other ranks cleared
+}));
+```
+
+### UI Design
+
+The Spells tab shows:
+
+1. **Prepared & Ready to Cast** section:
+   - Individual prepared spell instances
+   - Each instance has its own "Cast" button
+   - Clicking Cast removes that specific instance
+
+2. **Available Spells** section:
+   - Library of all divine spells
+   - "Prepare" button to add instances
+   - Shows ×N badge for how many instances prepared
+
+3. **Slot Tracker**:
+   - Shows `X/Y prepared` (X = current instances, Y = max slots)
+   - Visual dots showing filled vs empty slots
+
+### Testing
+
+Run comprehensive spell system tests:
+```bash
+node test-spells-refactor.cjs
+```
+
+Tests verify:
+- ✅ Individual instance tracking
+- ✅ Preparing same spell multiple times
+- ✅ Casting consumes specific instance
+- ✅ Rest clears prepared spells
+- ✅ Slot limit enforcement
+- ✅ Manual unpreparation
+
+---
+
+## 📦 Pathbuilder 2e Import/Export
+
+**Status**: ✅ **FULLY FUNCTIONAL** (as of 2025-11-19)
+
+### Overview
+
+Talon Tracker now supports importing and exporting character data to/from **Pathbuilder 2e JSON format**, allowing easy data portability between the two systems.
+
+**Source**: [Pathbuilder 2e](https://pathbuilder2e.com/)
+
+### Features
+
+1. **Export to Pathbuilder JSON**:
+   - Downloads character data as `.json` file
+   - Includes level, ability scores, skills, feats, equipment, spells
+   - Compatible with Pathbuilder 2e import
+
+2. **Import from Pathbuilder**:
+   - Reads Pathbuilder JSON files
+   - Updates character level, name, skills, feats, gear
+   - Validates Cleric class (Talon Tracker is configured for Clerics)
+   - Automatically recalculates HP
+
+3. **Reset to Level 8**:
+   - Quick action to reset character to level 8
+   - Recalculates HP and ability scores
+   - Clears prepared spells (must re-prepare)
+
+### Usage
+
+**Location**: Character tab (Overview) → "Character Management" section
+
+**Export**:
+```
+1. Click "Export to Pathbuilder JSON"
+2. File downloads automatically as: {characterName}-pathbuilder.json
+3. Use this file in Pathbuilder 2e or other tools
+```
+
+**Import**:
+```
+1. Click "Import from Pathbuilder"
+2. Select a Pathbuilder JSON file
+3. Character data updates automatically
+4. Review changes and re-prepare spells if needed
+```
+
+**Reset to Level 8**:
+```
+1. Click "Reset Character to Level 8"
+2. Confirm the action
+3. Character resets to level 8 with cleared spell preparations
+```
+
+### Implementation Details
+
+**Files**:
+- `src/pathbuilderUtils.js` - Import/export utility functions
+- `src/App.jsx` - Handler functions (handleExportToPathbuilder, handleImportFromPathbuilder, handleResetToLevel8)
+- `src/NewOverviewTab.jsx` - UI components
+
+**Data Mapping**:
+```javascript
+// Export converts Talon Tracker → Pathbuilder JSON
+{
+  level, characterName, characterGender,
+  selectedFeats, skillProficiencies, gear,
+  preparedSpells, divineFontChoice
+}
+→
+{
+  success: true,
+  build: {
+    name, level, class, ancestry, heritage,
+    abilities: { str, dex, con, int, wis, cha },
+    proficiencies: { ... },
+    feats: [[name, null, null, level]],
+    spellCasters: [{ ... }]
+  }
+}
+```
+
+### Limitations
+
+- **Class Restriction**: Import only works for Cleric characters
+- **Partial Data**: Some Pathbuilder fields (armor details, lores) not fully imported
+- **One-Way**: Export creates new file; doesn't sync with existing Pathbuilder builds
+- **Spell Preparation**: Prepared spells exported as list of spell IDs (instance tracking not preserved)
+
+### Testing
+
+Test the import/export:
+```bash
+# 1. Start dev server
+npm run dev
+
+# 2. Navigate to Character tab
+# 3. Scroll to "Character Management" section
+# 4. Test export (downloads JSON)
+# 5. Test import (upload a Pathbuilder JSON)
+# 6. Test reset to level 8
 ```
 
 ---

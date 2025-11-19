@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Sword, Heart, Shield, Zap, BookOpen, User, TrendingUp, Feather, Target, Plus, Trash2, Edit2, Check, X, Package, Sparkles, Info, ExternalLink, Award, GraduationCap } from 'lucide-react';
+import { Sword, Heart, Shield, Zap, BookOpen, User, TrendingUp, Feather, Target, Plus, Trash2, Edit2, Check, X, Package, Sparkles, Info, ExternalLink, Award, GraduationCap, Coins } from 'lucide-react';
 import pathfinderRules from './pathfinderRules.js';
 import {
   CHARACTER_IDENTITY,
   BASE_ABILITY_SCORES,
+  ABILITY_BOOST_PROGRESSION,
   INITIAL_FEATS,
   INITIAL_SKILL_PROFICIENCIES,
   INITIAL_EQUIPMENT,
   EQUIPMENT_DATABASE,
   ATTRIBUTE_MODIFIERS
 } from './characterConfig.js';
+import NewGearTab from './NewGearTab.jsx';
+import NewCombatTab from './NewCombatTab.jsx';
+import NewSpellsTab from './NewSpellsTab.jsx';
+import NewFeatsSkillsTab from './NewFeatsSkillsTab.jsx';
+import NewProgressionTab from './NewProgressionTab.jsx';
+import NewOverviewTab from './NewOverviewTab.jsx';
+import { exportToPathbuilder, importFromPathbuilder, resetToLevel8 } from './pathbuilderUtils.js';
 
 // Helper function to calculate max HP based on level
 function calculateMaxHP(level) {
@@ -145,12 +153,134 @@ function getEquipmentModifiers(gear) {
     ac: { value: 0, sources: [] },
     attackBonus: { value: 0, sources: [] },
     damageBonus: { value: 0, sources: [] },
+    damageDice: { value: 1, sources: [] }, // For striking runes
     savingThrows: { value: 0, sources: [] },
     speed: { value: 0, sources: [] }
   };
 
   gear.filter(item => item.equipped).forEach(item => {
-    // Check if item has equipment database entry
+    // Parse runes directly from item data (for items with embedded rune info)
+    if (item.runes) {
+      // Weapon runes
+      if (item.type === 'weapon') {
+        // Weapon potency rune (attack bonus)
+        if (item.runes.potency) {
+          const potencyMatch = item.runes.potency.match(/\+(\d)/);
+          if (potencyMatch) {
+            const bonus = parseInt(potencyMatch[1]);
+            modifiers.attackBonus.value += bonus;
+            modifiers.attackBonus.sources.push({
+              name: item.name,
+              bonus: bonus,
+              type: 'item',
+              runeType: 'potency'
+            });
+          }
+        }
+
+        // Striking rune (damage dice multiplier)
+        if (item.runes.striking) {
+          if (item.runes.striking.includes('Major Striking')) {
+            modifiers.damageDice.value = 4;
+            modifiers.damageDice.sources.push({
+              name: item.name,
+              dice: 4,
+              runeType: 'striking'
+            });
+          } else if (item.runes.striking.includes('Greater Striking')) {
+            modifiers.damageDice.value = 3;
+            modifiers.damageDice.sources.push({
+              name: item.name,
+              dice: 3,
+              runeType: 'striking'
+            });
+          } else if (item.runes.striking.includes('Striking')) {
+            modifiers.damageDice.value = 2;
+            modifiers.damageDice.sources.push({
+              name: item.name,
+              dice: 2,
+              runeType: 'striking'
+            });
+          }
+        }
+      }
+
+      // Armor runes
+      if (item.type === 'armor') {
+        // Armor potency rune (AC bonus)
+        if (item.runes.potency) {
+          const potencyMatch = item.runes.potency.match(/\+(\d)/);
+          if (potencyMatch) {
+            const bonus = parseInt(potencyMatch[1]);
+            modifiers.ac.value += bonus;
+            modifiers.ac.sources.push({
+              name: item.name,
+              bonus: bonus,
+              type: 'item',
+              runeType: 'potency'
+            });
+          }
+        }
+
+        // Resilient rune (saving throw bonus)
+        if (item.runes.resilient) {
+          if (item.runes.resilient.includes('Major Resilient')) {
+            modifiers.savingThrows.value += 3;
+            modifiers.savingThrows.sources.push({
+              name: item.name,
+              bonus: 3,
+              runeType: 'resilient'
+            });
+          } else if (item.runes.resilient.includes('Greater Resilient')) {
+            modifiers.savingThrows.value += 2;
+            modifiers.savingThrows.sources.push({
+              name: item.name,
+              bonus: 2,
+              runeType: 'resilient'
+            });
+          } else if (item.runes.resilient.includes('Resilient')) {
+            modifiers.savingThrows.value += 1;
+            modifiers.savingThrows.sources.push({
+              name: item.name,
+              bonus: 1,
+              runeType: 'resilient'
+            });
+          }
+        }
+      }
+    }
+
+    // Also check item.stats for base armor/shield bonuses
+    if (item.stats) {
+      if (item.stats.acBonus && item.type === 'armor') {
+        modifiers.ac.value += item.stats.acBonus;
+        modifiers.ac.sources.push({
+          name: item.name,
+          bonus: item.stats.acBonus,
+          type: 'armor base'
+        });
+      }
+
+      if (item.stats.acBonus && item.type === 'shield') {
+        modifiers.ac.value += item.stats.acBonus;
+        modifiers.ac.sources.push({
+          name: item.name,
+          bonus: item.stats.acBonus,
+          type: 'shield'
+        });
+      }
+
+      if (item.stats.speedPenalty) {
+        modifiers.speed.value += item.stats.speedPenalty;
+        modifiers.speed.sources.push({
+          name: item.name,
+          penalty: item.stats.speedPenalty,
+          type: 'armor'
+        });
+      }
+    }
+
+    // Fallback: Check if item has equipment database entry
     const dbKey = item.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
     let equipData = null;
 
@@ -167,21 +297,21 @@ function getEquipmentModifiers(gear) {
       equipData = EQUIPMENT_DATABASE.adventuringGear[dbKey];
     }
 
-    // Apply stat modifiers if found
+    // Apply stat modifiers if found in database
     if (equipData) {
       // AC bonuses from armor/shields
-      if (equipData.acBonus) {
+      if (equipData.acBonus && !item.stats?.acBonus) { // Avoid double-counting
         modifiers.ac.value += equipData.acBonus;
         modifiers.ac.sources.push({ name: equipData.name, bonus: equipData.acBonus, type: 'item' });
       }
 
       // Speed penalties from armor
-      if (equipData.speedPenalty) {
+      if (equipData.speedPenalty && !item.stats?.speedPenalty) { // Avoid double-counting
         modifiers.speed.value += equipData.speedPenalty;
         modifiers.speed.sources.push({ name: equipData.name, penalty: equipData.speedPenalty, type: 'armor' });
       }
 
-      // Rune bonuses
+      // Rune bonuses from database
       if (equipData.statModifiers) {
         if (equipData.statModifiers.acBonus) {
           modifiers.ac.value += equipData.statModifiers.acBonus;
@@ -338,13 +468,25 @@ export default function MinotaurCampaignTracker() {
         id: 1,
         name: 'Handwraps of Mighty Blows (+3 Major Striking)',
         equipped: true,
+        slot: 'weapon',
         type: 'weapon',
         description: 'These cloth strips wreathe your hands in powerful magic. Attack rolls with unarmed strikes gain +3 item bonus, and damage increases to 3 weapon dice.',
         source: 'Player Core pg. 581',
         url: 'https://2e.aonprd.com/Equipment.aspx?ID=1062',
+        stats: {
+          name: 'Handwraps of Mighty Blows',
+          category: 'weapon',
+          weaponType: 'unarmed',
+          hands: 0,
+          damage: '1d6',
+          damageType: 'bludgeoning',
+          bulk: 'L',
+          level: 2
+        },
         runes: {
           potency: '+3',
-          striking: 'Major Striking (3 dice)',
+          striking: 'majorStriking',
+          resilient: null,
           property: []
         }
       },
@@ -352,36 +494,54 @@ export default function MinotaurCampaignTracker() {
         id: 2,
         name: 'Lattice Armor (+3 Major Resilient)',
         equipped: true,
+        slot: 'armor',
         type: 'armor',
         description: 'Medium armor made of interlocking metal plates. AC bonus +6, Dex cap +1. Resilient rune grants +3 to all saves.',
         source: 'Player Core pg. 556',
         url: 'https://2e.aonprd.com/Armor.aspx?ID=38',
         stats: {
+          name: 'Lattice Armor',
+          category: 'armor',
+          armorType: 'medium',
           acBonus: 6,
           dexCap: 1,
           checkPenalty: -2,
-          speedPenalty: -5
+          speedPenalty: -5,
+          bulk: 2,
+          level: 5
         },
         runes: {
           potency: '+3',
-          resilient: 'Major Resilient (+3 saves)'
+          striking: null,
+          resilient: 'majorResilient',
+          property: []
         }
       },
       {
         id: 3,
-        name: 'Salvo Shield (Reinforcing Supreme)',
+        name: 'Steel Shield',
         equipped: true,
+        slot: 'shield',
         type: 'shield',
-        description: 'Steel shield with Hardness 15, HP 120, BT 60. Can be used offensively. Reinforcing (Supreme) rune increases Hardness to 20.',
-        source: 'Treasure Vault pg. 21',
-        url: 'https://2e.aonprd.com/Shields.aspx?ID=53',
+        description: 'Steel shield with Hardness 5, HP 20, BT 10.',
+        source: 'Player Core pg. 277',
+        url: 'https://2e.aonprd.com/Shields.aspx?ID=3',
         stats: {
+          name: 'Steel Shield',
+          category: 'shield',
           acBonus: 2,
-          hardness: 20,
-          hp: 120,
-          bt: 60
+          hardness: 5,
+          hp: 20,
+          bt: 10,
+          bulk: 1,
+          level: 0
         },
-        runes: ['Reinforcing (Supreme)']
+        runes: {
+          potency: null,
+          striking: null,
+          resilient: null,
+          property: []
+        }
       },
       {
         id: 4,
@@ -417,15 +577,48 @@ export default function MinotaurCampaignTracker() {
       }
     ];
   });
-  const [gearInput, setGearInput] = useState('');
-  const [gearQuantity, setGearQuantity] = useState(1);
 
-  // Spell state
+  // Spell state - PF2e compliant prepared spell system
+  // Each prepared spell is an individual instance with a unique ID
+  // Casting a spell removes that specific instance from the prepared list
+  // Source: Archives of Nethys - Prepared Spells (https://2e.aonprd.com/Rules.aspx?ID=271)
   const [preparedSpells, setPreparedSpells] = useState(() => {
     const saved = localStorage.getItem('prepared-spells');
-    return saved ? JSON.parse(saved) : {
-      cantrips: ['divine-lance', 'shield', 'guidance', 'detect-magic', 'light'],
-      rank1: ['bless', 'command'],
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Migrate old format (array of spell IDs) to new format (array of spell instances)
+      const migrated = {};
+      Object.keys(parsed).forEach(rank => {
+        if (Array.isArray(parsed[rank])) {
+          if (parsed[rank].length > 0 && typeof parsed[rank][0] === 'string') {
+            // Old format - convert to new format
+            migrated[rank] = parsed[rank].map((spellId, index) => ({
+              id: `${spellId}-${Date.now()}-${index}`,
+              spellId: spellId
+            }));
+          } else {
+            // Already new format
+            migrated[rank] = parsed[rank];
+          }
+        } else {
+          migrated[rank] = [];
+        }
+      });
+      return migrated;
+    }
+    // Default prepared spells as instances
+    return {
+      cantrips: [
+        { id: `divine-lance-${Date.now()}-0`, spellId: 'divine-lance' },
+        { id: `shield-${Date.now()}-1`, spellId: 'shield' },
+        { id: `guidance-${Date.now()}-2`, spellId: 'guidance' },
+        { id: `detect-magic-${Date.now()}-3`, spellId: 'detect-magic' },
+        { id: `light-${Date.now()}-4`, spellId: 'light' }
+      ],
+      rank1: [
+        { id: `bless-${Date.now()}-0`, spellId: 'bless' },
+        { id: `command-${Date.now()}-1`, spellId: 'command' }
+      ],
       rank2: [],
       rank3: [],
       rank4: [],
@@ -434,17 +627,11 @@ export default function MinotaurCampaignTracker() {
     };
   });
 
-  const [castSpells, setCastSpells] = useState(() => {
-    const saved = localStorage.getItem('cast-spells');
-    return saved ? JSON.parse(saved) : {
-      rank1: 0,
-      rank2: 0,
-      rank3: 0,
-      rank4: 0,
-      rank5: 0,
-      rank6: 0,
-      divineFont: 0
-    };
+  // Divine Font cast tracking (separate from regular spell slots)
+  // Divine Font uses a pool system (not prepared instances)
+  const [castFontSpells, setCastFontSpells] = useState(() => {
+    const saved = localStorage.getItem('cast-font-spells');
+    return saved ? parseInt(saved) : 0;
   });
 
   // Divine font choice state (for Versatile Font feat)
@@ -544,8 +731,8 @@ export default function MinotaurCampaignTracker() {
   }, [preparedSpells]);
 
   useEffect(() => {
-    localStorage.setItem('cast-spells', JSON.stringify(castSpells));
-  }, [castSpells]);
+    localStorage.setItem('cast-font-spells', castFontSpells.toString());
+  }, [castFontSpells]);
 
   useEffect(() => {
     localStorage.setItem('divine-font-choice', divineFontChoice);
@@ -817,6 +1004,18 @@ export default function MinotaurCampaignTracker() {
     addStoryLog(`Healed, HP increased from ${currentHP} to ${newHP}`);
   };
 
+  const handleHPDecrease10 = () => {
+    const newHP = Math.max(0, currentHP - 10);
+    setCurrentHP(newHP);
+    addStoryLog(`Took significant damage, HP decreased from ${currentHP} to ${newHP}`);
+  };
+
+  const handleHPIncrease10 = () => {
+    const newHP = Math.min(maxHP, currentHP + 10);
+    setCurrentHP(newHP);
+    addStoryLog(`Received healing, HP increased from ${currentHP} to ${newHP}`);
+  };
+
   // Level change handlers with story generation
   const handleLevelDecrease = () => {
     const newLevel = Math.max(1, level - 1);
@@ -888,55 +1087,52 @@ export default function MinotaurCampaignTracker() {
   };
 
   // Gear functions
-  const addGear = () => {
-    if (gearInput.trim()) {
-      const newGear = {
-        id: Date.now(),
-        name: gearInput,
-        equipped: false,
-        quantity: gearQuantity > 1 ? gearQuantity : undefined
-      };
-      setGear([...gear, newGear]);
-      setGearInput('');
-      setGearQuantity(1);
+  // Gear functions now handled internally by NewGearTab
+
+  // Spell functions - PF2e compliant system
+  // Each prepared spell is consumed when cast (removed from prepared list)
+  // Source: Archives of Nethys - Prepared Spells (https://2e.aonprd.com/Rules.aspx?ID=271)
+
+  // Cast a specific prepared spell instance
+  const castSpell = (rank, preparedInstanceId) => {
+    setPreparedSpells(prev => ({
+      ...prev,
+      [rank]: prev[rank].filter(instance => instance.id !== preparedInstanceId)
+    }));
+
+    // Add to story log
+    const instance = preparedSpells[rank]?.find(inst => inst.id === preparedInstanceId);
+    if (instance) {
+      addStoryLog(`Cast ${instance.spellId} (Rank ${rank.replace('rank', '')})`);
     }
   };
 
-  const deleteGear = (id) => {
-    setGear(gear.filter(item => item.id !== id));
-  };
-
-  const toggleEquipped = (id) => {
-    setGear(gear.map(item =>
-      item.id === id ? { ...item, equipped: !item.equipped } : item
-    ));
-  };
-
-  // Spell functions
-  const castSpell = (rank) => {
-    setCastSpells(prev => ({
+  // Unprepare a specific spell instance (for manual unpreparation)
+  const unprepareSpell = (rank, preparedInstanceId) => {
+    setPreparedSpells(prev => ({
       ...prev,
-      [rank]: Math.min(prev[rank] + 1, getMaxSpellSlots(level, rank))
+      [rank]: prev[rank].filter(instance => instance.id !== preparedInstanceId)
     }));
   };
 
-  const uncastSpell = (rank) => {
-    setCastSpells(prev => ({
-      ...prev,
-      [rank]: Math.max(prev[rank] - 1, 0)
-    }));
-  };
-
+  // Rest - clears all prepared spells and resets divine font
+  // After resting, player must re-prepare spells for the new day
   const restSpells = () => {
-    setCastSpells({
-      rank1: 0,
-      rank2: 0,
-      rank3: 0,
-      rank4: 0,
-      rank5: 0,
-      rank6: 0,
-      divineFont: 0
-    });
+    // Clear all prepared spells (except cantrips which stay prepared)
+    setPreparedSpells(prev => ({
+      cantrips: prev.cantrips, // Cantrips remain prepared
+      rank1: [],
+      rank2: [],
+      rank3: [],
+      rank4: [],
+      rank5: [],
+      rank6: []
+    }));
+
+    // Reset divine font
+    setCastFontSpells(0);
+
+    addStoryLog('Rested and recovered spell slots');
   };
 
   // Toggle spell preparation - PF2e allows preparing same spell multiple times
@@ -946,19 +1142,23 @@ export default function MinotaurCampaignTracker() {
       const current = prev[rank] || [];
       const maxSlots = getMaxSpellSlots(level, rank);
 
-      // Check if spell is currently prepared
-      const preparedCount = current.filter(id => id === spellId).length;
+      // Check if spell is currently prepared (count instances)
+      const preparedInstances = current.filter(instance => instance.spellId === spellId);
 
-      if (preparedCount > 0) {
-        // Unprepare ONE instance of this spell
-        const index = current.indexOf(spellId);
+      if (preparedInstances.length > 0) {
+        // Unprepare ONE instance of this spell (remove the first one found)
+        const indexToRemove = current.findIndex(instance => instance.spellId === spellId);
         const newArray = [...current];
-        newArray.splice(index, 1);
+        newArray.splice(indexToRemove, 1);
         return { ...prev, [rank]: newArray };
       } else {
         // Prepare spell if slots available
         if (current.length < maxSlots) {
-          return { ...prev, [rank]: [...current, spellId] };
+          const newInstance = {
+            id: `${spellId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            spellId: spellId
+          };
+          return { ...prev, [rank]: [...current, newInstance] };
         }
         return prev; // No slots available
       }
@@ -1020,6 +1220,99 @@ export default function MinotaurCampaignTracker() {
       });
 
       addStoryLog(`Removed ${skillName} proficiency`);
+    }
+  };
+
+  // Import/Export and Reset functions
+  const handleExportToPathbuilder = () => {
+    try {
+      const characterData = {
+        level,
+        characterName,
+        characterGender,
+        selectedFeats,
+        skillProficiencies,
+        gear,
+        preparedSpells,
+        divineFontChoice
+      };
+
+      const pathbuilderJSON = exportToPathbuilder(characterData);
+
+      // Create downloadable JSON file
+      const dataStr = JSON.stringify(pathbuilderJSON, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${characterName || 'character'}-pathbuilder.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      addStoryLog('Exported character to Pathbuilder JSON format');
+    } catch (error) {
+      console.error('Export error:', error);
+      alert(`Export failed: ${error.message}`);
+    }
+  };
+
+  const handleImportFromPathbuilder = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const pathbuilderJSON = JSON.parse(e.target.result);
+        const importedData = importFromPathbuilder(pathbuilderJSON);
+
+        // Update character state with imported data
+        if (importedData.level) setLevel(importedData.level);
+        if (importedData.characterName) setCharacterName(importedData.characterName);
+        if (importedData.characterGender) setCharacterGender(importedData.characterGender);
+        if (importedData.skillProficiencies) setSkillProficiencies(importedData.skillProficiencies);
+        if (importedData.selectedFeats) setSelectedFeats(importedData.selectedFeats);
+        if (importedData.gear) setGear(importedData.gear);
+        if (importedData.divineFontChoice) setDivineFontChoice(importedData.divineFontChoice);
+
+        // Recalculate HP for new level
+        const newMaxHP = calculateMaxHP(importedData.level || level);
+        setMaxHP(newMaxHP);
+        setCurrentHP(newMaxHP);
+
+        addStoryLog(`Imported character from Pathbuilder: ${importedData.characterName || 'Unknown'} (Level ${importedData.level || level})`);
+        alert('Character imported successfully from Pathbuilder JSON!');
+      } catch (error) {
+        console.error('Import error:', error);
+        alert(`Import failed: ${error.message}`);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleResetToLevel8 = () => {
+    if (confirm('Reset character to Level 8? This will update level and recalculate all stats.')) {
+      const resetData = resetToLevel8();
+      setLevel(8);
+
+      // Recalculate HP for level 8
+      const newMaxHP = calculateMaxHP(8);
+      setMaxHP(newMaxHP);
+      setCurrentHP(newMaxHP);
+
+      // Clear spell preparations (must re-prepare for level 8)
+      setPreparedSpells({
+        cantrips: preparedSpells.cantrips, // Keep cantrips
+        rank1: [],
+        rank2: [],
+        rank3: [],
+        rank4: [],
+        rank5: [],
+        rank6: []
+      });
+
+      addStoryLog('Character reset to Level 8 - spell preparations cleared');
+      alert('Character reset to Level 8! Please re-prepare spells.');
     }
   };
 
@@ -1163,8 +1456,16 @@ export default function MinotaurCampaignTracker() {
                   </div>
                   <div className="flex items-center gap-2 justify-center">
                     <button
+                      onClick={handleHPDecrease10}
+                      className="w-10 h-8 bg-red-800 hover:bg-red-900 text-white rounded text-xs font-semibold flex items-center justify-center transform hover:scale-110 transition-all active:scale-95"
+                      title="Decrease HP by 10"
+                    >
+                      -10
+                    </button>
+                    <button
                       onClick={handleHPDecrease}
                       className="w-8 h-8 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center transform hover:scale-110 transition-all active:scale-95"
+                      title="Decrease HP by 1"
                     >
                       -
                     </button>
@@ -1175,8 +1476,16 @@ export default function MinotaurCampaignTracker() {
                     <button
                       onClick={handleHPIncrease}
                       className="w-8 h-8 bg-green-600 hover:bg-green-700 text-white rounded flex items-center justify-center transform hover:scale-110 transition-all active:scale-95"
+                      title="Increase HP by 1"
                     >
                       +
+                    </button>
+                    <button
+                      onClick={handleHPIncrease10}
+                      className="w-10 h-8 bg-green-800 hover:bg-green-900 text-white rounded text-xs font-semibold flex items-center justify-center transform hover:scale-110 transition-all active:scale-95"
+                      title="Increase HP by 10"
+                    >
+                      +10
                     </button>
                   </div>
                 </div>
@@ -1254,11 +1563,16 @@ export default function MinotaurCampaignTracker() {
           <div className="flex flex-wrap gap-2">
             {tabs.map((tab, index) => {
               const Icon = tab.icon;
+              const isStoryTab = tab.id === 'story';
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 ${
+                  className={`flex items-center gap-2 px-4 rounded-lg transition-all duration-300 ${
+                    isStoryTab
+                      ? 'w-full py-1 justify-center'
+                      : 'py-2 transform hover:scale-105'
+                  } ${
                     activeTab === tab.id
                       ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/50'
                       : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
@@ -1267,8 +1581,8 @@ export default function MinotaurCampaignTracker() {
                     animationDelay: `${index * 50}ms`
                   }}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span className="font-medium">{tab.label}</span>
+                  <Icon className={isStoryTab ? 'w-3 h-3' : 'w-4 h-4'} />
+                  <span className={`font-medium ${isStoryTab ? 'text-sm' : ''}`}>{tab.label}</span>
                 </button>
               );
             })}
@@ -1278,43 +1592,67 @@ export default function MinotaurCampaignTracker() {
         {/* Content Area */}
         <div className={`bg-slate-800/70 rounded-lg shadow-2xl p-6 backdrop-blur border border-slate-700 transform transition-all duration-700 delay-200 ${mounted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
           {activeTab === 'overview' && (
-            <OverviewTab
+            <NewOverviewTab
               level={level}
-              avatarUrl={avatarUrl}
-              isGeneratingAvatar={isGeneratingAvatar}
-              generateAvatar={generateAvatar}
+              getAbilityScore={getAbilityScore}
+              getModifier={getModifier}
+              getProficiencyBonus={getProficiencyBonus}
+              BASE_ABILITY_SCORES={BASE_ABILITY_SCORES}
+              onExportToPathbuilder={handleExportToPathbuilder}
+              onImportFromPathbuilder={handleImportFromPathbuilder}
+              onResetToLevel8={handleResetToLevel8}
             />
           )}
-          {activeTab === 'combat' && <CombatTab level={level} />}
+          {activeTab === 'combat' && (
+            <NewCombatTab
+              level={level}
+              gear={gear}
+              getAbilityScore={getAbilityScore}
+              getModifier={getModifier}
+              getProficiencyBonus={getProficiencyBonus}
+              getEquipmentModifiers={getEquipmentModifiers}
+              BASE_ABILITY_SCORES={BASE_ABILITY_SCORES}
+            />
+          )}
           {activeTab === 'spells' && (
-            <SpellsTab
+            <NewSpellsTab
               level={level}
               preparedSpells={preparedSpells}
-              setPreparedSpells={setPreparedSpells}
-              castSpells={castSpells}
               castSpell={castSpell}
-              uncastSpell={uncastSpell}
-              restSpells={restSpells}
+              unprepareSpell={unprepareSpell}
               togglePreparedSpell={togglePreparedSpell}
+              castFontSpells={castFontSpells}
+              setCastFontSpells={setCastFontSpells}
               divineFontChoice={divineFontChoice}
               setDivineFontChoice={setDivineFontChoice}
+              onRest={restSpells}
+              getAbilityScore={getAbilityScore}
+              getModifier={getModifier}
+              getProficiencyBonus={getProficiencyBonus}
+              BASE_ABILITY_SCORES={BASE_ABILITY_SCORES}
             />
           )}
           {activeTab === 'feats' && (
-            <FeatsSkillsTab
+            <NewFeatsSkillsTab
               level={level}
               selectedFeats={selectedFeats}
               setSelectedFeats={setSelectedFeats}
               skillProficiencies={skillProficiencies}
               setSkillProficiencies={setSkillProficiencies}
-              addFeat={addFeat}
-              removeFeat={removeFeat}
-              increaseSkillProficiency={increaseSkillProficiency}
-              removeSkillProficiency={removeSkillProficiency}
-              addStoryLog={addStoryLog}
+              getAbilityScore={getAbilityScore}
+              getModifier={getModifier}
+              getProficiencyBonus={getProficiencyBonus}
+              BASE_ABILITY_SCORES={BASE_ABILITY_SCORES}
             />
           )}
-          {activeTab === 'progression' && <ProgressionTab level={level} />}
+          {activeTab === 'progression' && (
+            <NewProgressionTab
+              level={level}
+              abilityBoosts={ABILITY_BOOST_PROGRESSION}
+              getAbilityScore={getAbilityScore}
+              BASE_ABILITY_SCORES={BASE_ABILITY_SCORES}
+            />
+          )}
           {activeTab === 'notes' && (
             <NotesTab 
               notes={notes}
@@ -1329,16 +1667,15 @@ export default function MinotaurCampaignTracker() {
             />
           )}
           {activeTab === 'gear' && (
-            <GearTab
+            <NewGearTab
               gear={gear}
-              gearInput={gearInput}
-              setGearInput={setGearInput}
-              gearQuantity={gearQuantity}
-              setGearQuantity={setGearQuantity}
-              addGear={addGear}
-              deleteGear={deleteGear}
-              toggleEquipped={toggleEquipped}
+              setGear={setGear}
               level={level}
+              calculateTotalBulk={calculateTotalBulk}
+              getEquipmentModifiers={getEquipmentModifiers}
+              getAbilityScore={getAbilityScore}
+              getModifier={getModifier}
+              BASE_ABILITY_SCORES={BASE_ABILITY_SCORES}
             />
           )}
           {activeTab === 'story' && (
@@ -1354,6 +1691,8 @@ export default function MinotaurCampaignTracker() {
   );
 }
 
+// DEPRECATED: This OverviewTab function is replaced by NewOverviewTab.jsx
+// TODO: Remove this function after confirming NewOverviewTab works correctly
 function OverviewTab({ level, avatarUrl, isGeneratingAvatar, generateAvatar }) {
   // Calculate ability scores based on level
   // Source: characterConfig.js - BASE_ABILITY_SCORES (includes Level 1 boosts)
@@ -1682,456 +2021,6 @@ function OverviewTab({ level, avatarUrl, isGeneratingAvatar, generateAvatar }) {
             </div>
           </Tooltip>
         </div>
-      </StatBlock>
-    </div>
-  );
-}
-
-function CombatTab({ level }) {
-  // Calculate ability modifiers
-  // Source: characterConfig.js - BASE_ABILITY_SCORES
-  const strScore = getAbilityScore(BASE_ABILITY_SCORES.STR, 'STR', level);
-  const dexScore = getAbilityScore(BASE_ABILITY_SCORES.DEX, 'DEX', level);
-  const wisScore = getAbilityScore(BASE_ABILITY_SCORES.WIS, 'WIS', level);
-  const conScore = getAbilityScore(BASE_ABILITY_SCORES.CON, 'CON', level);
-
-  const strMod = getModifier(strScore);
-  const dexMod = getModifier(dexScore);
-  const wisMod = getModifier(wisScore);
-  const conMod = getModifier(conScore);
-
-  // Weapon proficiency progression (Warpriest Fifth Doctrine at 19)
-  // Trained (1) → Expert (7) → Master (11) → Legendary (19)
-  const weaponRank = level >= 19 ? 'legendary' : level >= 11 ? 'master' : level >= 7 ? 'expert' : 'trained';
-  const weaponProf = getProficiencyBonus(level, weaponRank);
-
-  // Equipment bonuses (from Handwraps of Mighty Blows +3)
-  const itemBonus = level >= 16 ? 3 : level >= 10 ? 2 : level >= 4 ? 1 : 0;
-  const strikingDice = level >= 19 ? 3 : level >= 12 ? 2 : level >= 4 ? 1 : 0; // Major Striking
-
-  // Weapon Specialization (from Warpriest)
-  const specializationBonus = level >= 19 ? 4 : level >= 15 ? 3 : level >= 13 ? 2 : 0;
-
-  // Attack calculations with equipment
-  const attackBonus = strMod + weaponProf + itemBonus;
-  const numDice = 1 + strikingDice; // Base 1d8 + striking
-  const fistDamage = `${numDice}d8+${strMod + specializationBonus}`;
-  const hornDamage = `${numDice}d8+${strMod + specializationBonus}`;
-
-  // AC: 10 + Dex + armor + proficiency + item bonus
-  // Armor: Trained (1) → Expert (13) → Master (19) → Legendary (20)
-  const armorRank = level >= 20 ? 'legendary' : level >= 19 ? 'master' : level >= 13 ? 'expert' : 'trained';
-  const armorProf = getProficiencyBonus(level, armorRank);
-  const armorItemBonus = level >= 16 ? 3 : level >= 10 ? 2 : level >= 5 ? 1 : 0;
-  const latticeArmor = 6; // Medium armor AC bonus
-  const dexCap = Math.min(dexMod, 1); // Lattice armor Dex cap +1
-  const armorClass = 10 + dexCap + latticeArmor + armorProf + armorItemBonus;
-
-  // Shield bonus (+2 when raised)
-  const shieldBonus = 2;
-
-  // Perception: Trained (1) → Expert (5) → Master (11) → Legendary (17)
-  const perceptionRank = level >= 17 ? 'legendary' : level >= 11 ? 'master' : level >= 5 ? 'expert' : 'trained';
-  const perceptionProf = getProficiencyBonus(level, perceptionRank);
-  const perception = wisMod + perceptionProf;
-
-  // Spell DC: 10 + Wis + proficiency (Trained at 1, Expert at 7, Master at 15, Legendary at 19)
-  const spellRank = level >= 19 ? 'legendary' : level >= 15 ? 'master' : level >= 7 ? 'expert' : 'trained';
-  const spellProf = getProficiencyBonus(level, spellRank);
-  const spellDC = 10 + wisMod + spellProf;
-  const spellAttack = wisMod + spellProf;
-
-  // Saves with Resilient rune bonus (+3 at level 20)
-  const resilientBonus = level >= 16 ? 3 : level >= 11 ? 2 : level >= 8 ? 1 : 0;
-
-  // Fortitude: Expert at 1 (Warpriest), Master at 11, Legendary at 19
-  const fortRank = level >= 19 ? 'legendary' : level >= 11 ? 'master' : 'expert';
-  const fortProf = getProficiencyBonus(level, fortRank);
-
-  // Reflex: Trained at 1, Expert at 13, Master at 17, Legendary at 19
-  const refRank = level >= 19 ? 'legendary' : level >= 17 ? 'master' : level >= 13 ? 'expert' : 'trained';
-  const refProf = getProficiencyBonus(level, refRank);
-
-  // Will: Expert at 1, Master at 13, Legendary at 19
-  const willRank = level >= 19 ? 'legendary' : level >= 13 ? 'master' : 'expert';
-  const willProf = getProficiencyBonus(level, willRank);
-  
-  return (
-    <div className="space-y-6">
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="relative">
-          <Tooltip content={
-            <>
-              <div className="font-semibold text-purple-300 mb-2">Armor Class (AC)</div>
-              <div className="space-y-2 text-slate-300">
-                <div className="bg-slate-700/50 p-2 rounded">
-                  <div className="font-semibold mb-1">AC Calculation:</div>
-                  <div className="pl-2 text-sm">
-                    • Base: <span className="text-green-400">10</span>
-                  </div>
-                  <div className="pl-2 text-sm">
-                    • Dexterity modifier (capped): <span className="text-green-400">+{dexCap}</span>
-                  </div>
-                  <div className="pl-2 text-sm">
-                    • Lattice Armor AC bonus: <span className="text-green-400">+{latticeArmor}</span>
-                    <a
-                      href="https://2e.aonprd.com/Armor.aspx?ID=38"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-1 text-purple-400 hover:text-purple-300 inline-flex items-center gap-0.5"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                  <div className="pl-2 text-sm">
-                    • Armor item bonus (+{armorRank}): <span className="text-green-400">+{armorItemBonus}</span>
-                  </div>
-                  <div className="pl-2 text-sm">
-                    • Armor proficiency ({armorRank}): <span className="text-green-400">+{armorProf}</span>
-                    <a
-                      href={pathfinderRules.classes.cleric.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-1 text-purple-400 hover:text-purple-300 inline-flex items-center gap-0.5"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                  <div className="pl-2 text-sm font-semibold border-t border-slate-600 mt-1 pt-1">
-                    = <span className="text-green-400">{armorClass}</span> total AC
-                  </div>
-                </div>
-                <div className="bg-purple-900/50 p-2 rounded border border-purple-600">
-                  <div className="font-bold text-purple-300">
-                    Armor Class: <span className="text-green-400">{armorClass}</span>
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    Warpriest proficiency: {armorRank === 'expert' ? 'Expert at 13' : 'Trained at 1'}
-                  </div>
-                </div>
-              </div>
-            </>
-          }>
-            <div className="cursor-help">
-              <StatCard
-                icon={Shield}
-                label="Armor Class"
-                value={`${armorClass}`}
-                subtitle={level >= 13 ? "Expert" : "Trained"}
-                color="blue"
-              />
-            </div>
-          </Tooltip>
-        </div>
-
-        <div className="relative">
-          <Tooltip content={
-            <>
-              <div className="font-semibold text-purple-300 mb-2">Perception</div>
-              <div className="space-y-2 text-slate-300">
-                <div className="bg-slate-700/50 p-2 rounded">
-                  <div className="font-semibold mb-1">Perception Calculation:</div>
-                  <div className="pl-2 text-sm">
-                    • Wisdom modifier: <span className="text-green-400">+{wisMod}</span>
-                  </div>
-                  <div className="pl-2 text-sm">
-                    • Proficiency ({perceptionRank}): <span className="text-green-400">+{perceptionProf}</span>
-                    <a
-                      href={pathfinderRules.classes.cleric.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-1 text-purple-400 hover:text-purple-300 inline-flex items-center gap-0.5"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                  <div className="pl-2 text-sm font-semibold border-t border-slate-600 mt-1 pt-1">
-                    = <span className="text-green-400">+{perception}</span> total
-                  </div>
-                </div>
-                <div className="bg-purple-900/50 p-2 rounded border border-purple-600">
-                  <div className="font-bold text-purple-300">
-                    Perception: <span className="text-green-400">+{perception}</span>
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    {perceptionRank === 'expert' ? 'Expert at level 5' : 'Trained at level 1'}
-                  </div>
-                </div>
-              </div>
-            </>
-          }>
-            <div className="cursor-help">
-              <StatCard
-                icon={Target}
-                label="Perception"
-                value={`+${perception}`}
-                subtitle={level >= 5 ? "Expert" : "Trained"}
-                color="purple"
-              />
-            </div>
-          </Tooltip>
-        </div>
-
-        <div className="relative">
-          <Tooltip content={
-            <>
-              <div className="font-semibold text-purple-300 mb-2">Spell DC</div>
-              <div className="space-y-2 text-slate-300">
-                <div className="bg-slate-700/50 p-2 rounded">
-                  <div className="font-semibold mb-1">Spell DC Calculation:</div>
-                  <div className="pl-2 text-sm">
-                    • Base: <span className="text-green-400">10</span>
-                  </div>
-                  <div className="pl-2 text-sm">
-                    • Wisdom modifier: <span className="text-green-400">+{wisMod}</span>
-                  </div>
-                  <div className="pl-2 text-sm">
-                    • Spell proficiency ({spellRank}): <span className="text-green-400">+{spellProf}</span>
-                    <a
-                      href={pathfinderRules.classes.cleric.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-1 text-purple-400 hover:text-purple-300 inline-flex items-center gap-0.5"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                  <div className="pl-2 text-sm font-semibold border-t border-slate-600 mt-1 pt-1">
-                    = <span className="text-green-400">{spellDC}</span> total DC
-                  </div>
-                </div>
-                <div className="bg-purple-900/50 p-2 rounded border border-purple-600">
-                  <div className="font-bold text-purple-300">
-                    Spell DC: <span className="text-green-400">{spellDC}</span>
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    Warpriest: {spellRank === 'expert' ? 'Expert at 11' : 'Trained at 1'}
-                  </div>
-                </div>
-              </div>
-            </>
-          }>
-            <div className="cursor-help">
-              <StatCard
-                icon={Zap}
-                label="Spell DC"
-                value={`${spellDC}`}
-                subtitle={level >= 11 ? "Expert" : "Trained"}
-                color="green"
-              />
-            </div>
-          </Tooltip>
-        </div>
-      </div>
-
-      <StatBlock title="Attacks" icon={Sword}>
-        <div className="space-y-4">
-          <AttackCard
-            name="Fist Strike (Unarmed)"
-            bonus={`+${attackBonus}`}
-            damage={fistDamage}
-            damageType="bludgeoning"
-            traits={["Agile", "Finesse", "Nonlethal", "Unarmed"]}
-            proficiency={weaponRank.charAt(0).toUpperCase() + weaponRank.slice(1)}
-            abilityMod={strMod}
-            weaponProf={weaponProf}
-            itemBonus={itemBonus}
-            level={level}
-            weaponUrl="https://2e.aonprd.com/Equipment.aspx?ID=1062"
-            description={`Unarmed strike with Handwraps of Mighty Blows (+${itemBonus}, ${strikingDice > 0 ? 'Striking' : ''}). Deadly Simplicity makes base damage 1d8.`}
-          />
-          <AttackCard
-            name="Horn Strike"
-            bonus={`+${attackBonus}`}
-            damage={hornDamage}
-            damageType="piercing"
-            traits={["Unarmed", "Brawling"]}
-            proficiency={weaponRank.charAt(0).toUpperCase() + weaponRank.slice(1)}
-            abilityMod={strMod}
-            weaponProf={weaponProf}
-            itemBonus={itemBonus}
-            level={level}
-            weaponUrl={pathfinderRules.ancestries.minotaur.url}
-            description={`Natural horn attack from Minotaur ancestry, enhanced by Handwraps (+${itemBonus}, ${strikingDice > 0 ? 'Striking' : ''})`}
-          />
-          {level >= 13 && (
-            <div className="bg-green-900/30 rounded-lg p-3 border border-green-700">
-              <div className="text-sm text-green-300 font-semibold">Weapon Specialization</div>
-              <div className="text-xs text-slate-300 mt-1">
-                +{level >= 19 ? '4' : level >= 15 ? '3' : '2'} damage with all weapons (Expert or better)
-              </div>
-            </div>
-          )}
-        </div>
-      </StatBlock>
-
-      <StatBlock title="Saving Throws" icon={Shield}>
-        <div className="grid md:grid-cols-3 gap-4">
-          <Tooltip content={
-            <>
-              <div className="font-semibold text-purple-300 mb-2">Fortitude Save</div>
-              <div className="space-y-2 text-slate-300">
-                <div className="bg-slate-700/50 p-2 rounded">
-                  <div className="font-semibold mb-1">Calculation:</div>
-                  <div className="pl-2 text-sm">
-                    • Constitution modifier: <span className="text-green-400">+{conMod}</span>
-                  </div>
-                  <div className="pl-2 text-sm">
-                    • Proficiency ({fortRank}): <span className="text-green-400">+{fortProf}</span>
-                    <a
-                      href={pathfinderRules.classes.cleric.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-1 text-purple-400 hover:text-purple-300 inline-flex items-center gap-0.5"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                  {resilientBonus > 0 && (
-                    <div className="pl-2 text-sm">
-                      • Resilient rune bonus: <span className="text-green-400">+{resilientBonus}</span>
-                    </div>
-                  )}
-                  <div className="pl-2 text-sm font-semibold border-t border-slate-600 mt-1 pt-1">
-                    = <span className="text-green-400">+{conMod + fortProf + resilientBonus}</span> total
-                  </div>
-                </div>
-                <div className="bg-purple-900/50 p-2 rounded border border-purple-600">
-                  <div className="font-bold text-purple-300">
-                    Fortitude: <span className="text-green-400">+{conMod + fortProf + resilientBonus}</span>
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    {pathfinderRules.savingThrows.fortitude.description}
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    Warpriest: Expert at 1, Master at 11, Legendary at 19
-                  </div>
-                </div>
-              </div>
-            </>
-          }>
-            <div className="cursor-help">
-              <StatItem
-                label={`Fortitude (${fortRank.charAt(0).toUpperCase() + fortRank.slice(1)})`}
-                value={`+${conMod + fortProf + resilientBonus}`}
-              />
-            </div>
-          </Tooltip>
-          <Tooltip content={
-            <>
-              <div className="font-semibold text-purple-300 mb-2">Reflex Save</div>
-              <div className="space-y-2 text-slate-300">
-                <div className="bg-slate-700/50 p-2 rounded">
-                  <div className="font-semibold mb-1">Calculation:</div>
-                  <div className="pl-2 text-sm">
-                    • Dexterity modifier: <span className="text-green-400">+{dexMod}</span>
-                  </div>
-                  <div className="pl-2 text-sm">
-                    • Proficiency ({refRank}): <span className="text-green-400">+{refProf}</span>
-                    <a
-                      href={pathfinderRules.classes.cleric.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-1 text-purple-400 hover:text-purple-300 inline-flex items-center gap-0.5"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                  {resilientBonus > 0 && (
-                    <div className="pl-2 text-sm">
-                      • Resilient rune bonus: <span className="text-green-400">+{resilientBonus}</span>
-                    </div>
-                  )}
-                  <div className="pl-2 text-sm font-semibold border-t border-slate-600 mt-1 pt-1">
-                    = <span className="text-green-400">+{dexMod + refProf + resilientBonus}</span> total
-                  </div>
-                </div>
-                <div className="bg-purple-900/50 p-2 rounded border border-purple-600">
-                  <div className="font-bold text-purple-300">
-                    Reflex: <span className="text-green-400">+{dexMod + refProf}</span>
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    {pathfinderRules.savingThrows.reflex.description}
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    Trained at 1, Expert at 11
-                  </div>
-                </div>
-              </div>
-            </>
-          }>
-            <div className="cursor-help">
-              <StatItem
-                label={`Reflex (${refRank.charAt(0).toUpperCase() + refRank.slice(1)})`}
-                value={`+${dexMod + refProf}`}
-              />
-            </div>
-          </Tooltip>
-          <Tooltip content={
-            <>
-              <div className="font-semibold text-purple-300 mb-2">Will Save</div>
-              <div className="space-y-2 text-slate-300">
-                <div className="bg-slate-700/50 p-2 rounded">
-                  <div className="font-semibold mb-1">Calculation:</div>
-                  <div className="pl-2 text-sm">
-                    • Wisdom modifier: <span className="text-green-400">+{wisMod}</span>
-                  </div>
-                  <div className="pl-2 text-sm">
-                    • Proficiency ({willRank}): <span className="text-green-400">+{willProf}</span>
-                    <a
-                      href={pathfinderRules.classes.cleric.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-1 text-purple-400 hover:text-purple-300 inline-flex items-center gap-0.5"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                  {resilientBonus > 0 && (
-                    <div className="pl-2 text-sm">
-                      • Resilient rune bonus: <span className="text-green-400">+{resilientBonus}</span>
-                      <a
-                        href="https://2e.aonprd.com/Equipment.aspx?ID=1209"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-1 text-purple-400 hover:text-purple-300 inline-flex items-center gap-0.5"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
-                  )}
-                  <div className="pl-2 text-sm font-semibold border-t border-slate-600 mt-1 pt-1">
-                    = <span className="text-green-400">+{wisMod + willProf + resilientBonus}</span> total
-                  </div>
-                </div>
-                <div className="bg-purple-900/50 p-2 rounded border border-purple-600">
-                  <div className="font-bold text-purple-300">
-                    Will: <span className="text-green-400">+{wisMod + willProf + resilientBonus}</span>
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    {pathfinderRules.savingThrows.will.description}
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    Expert at 1, Master at 9 (with Resolute Faith){resilientBonus > 0 ? `, +${resilientBonus} from Major Resilient rune` : ''}
-                  </div>
-                </div>
-              </div>
-            </>
-          }>
-            <div className="cursor-help">
-              <StatItem
-                label={`Will (${willRank.charAt(0).toUpperCase() + willRank.slice(1)})`}
-                value={`+${wisMod + willProf + resilientBonus}`}
-              />
-            </div>
-          </Tooltip>
-        </div>
-        {level >= 9 && (
-          <div className="mt-3 bg-purple-900/30 rounded-lg p-3 border border-purple-700">
-            <div className="text-sm text-purple-300 font-semibold">Resolute Faith</div>
-            <div className="text-xs text-slate-300">Success on Will saves becomes critical success</div>
-          </div>
-        )}
       </StatBlock>
     </div>
   );
@@ -3588,73 +3477,359 @@ function NotesTab({ notes, noteInput, setNoteInput, addNote, deleteNote, editing
   );
 }
 
-function GearTab({ gear, gearInput, setGearInput, gearQuantity, setGearQuantity, addGear, deleteGear, toggleEquipped, level }) {
-  const equipped = gear.filter(item => item.equipped);
-  const inventory = gear.filter(item => !item.equipped);
+function GearTab({ gear, setGear, level }) {
+  const [selectedCategory, setSelectedCategory] = useState('equipped');
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [showRuneManager, setShowRuneManager] = useState(false);
+  const [runeTargetItem, setRuneTargetItem] = useState(null);
+
+  // Equipment slots (mimics character sheet layout)
+  const getEquippedItem = (slot) => {
+    return gear.find(item => item.equipped && item.slot === slot);
+  };
 
   // Calculate total bulk
   const totalBulk = calculateTotalBulk(gear);
   const strScore = getAbilityScore(BASE_ABILITY_SCORES.STR, 'STR', level);
   const strModifier = getModifier(strScore);
-  const bulkLimit = 5 + strModifier; // Base 5 + STR modifier
+  const bulkLimit = 5 + strModifier;
   const encumbered = totalBulk > bulkLimit;
   const overloaded = totalBulk > bulkLimit + 5;
 
   // Get equipment modifiers from equipped gear
   const equipmentMods = getEquipmentModifiers(gear);
 
-  // Equipment upgrade suggestions based on level
-  const getEquipmentSuggestions = () => {
-    const suggestions = [];
+  // Get wealth by level from rules
+  const wealthForLevel = pathfinderRules.wealthByLevel.table[level] || pathfinderRules.wealthByLevel.table[1];
 
-    // Armor upgrades
-    const hasHideArmor = gear.some(item => item.name === 'Hide Armor');
-    const hasBreastplate = gear.some(item => item.name === 'Breastplate');
+  // Get available runes for current level
+  const getAvailableRunes = (itemType) => {
+    const runes = [];
+    const fundamentalRunes = pathfinderRules.fundamentalRunes;
 
-    if (level >= 3 && hasHideArmor && !hasBreastplate) {
-      suggestions.push({
-        type: 'upgrade',
-        item: 'Breastplate',
-        reason: 'Higher AC bonus (+4 vs +3) - Consider upgrading armor',
-        level: 3
+    if (itemType === 'weapon') {
+      Object.entries(fundamentalRunes.weapon.potency.tiers).forEach(([tier, data]) => {
+        if (data.level <= level) {
+          runes.push({
+            id: `weapon-potency-${tier}`,
+            name: `Weapon Potency ${tier}`,
+            level: data.level,
+            price: data.price,
+            effect: data.bonus,
+            type: 'weapon',
+            category: 'potency',
+            url: fundamentalRunes.weapon.potency.url,
+            tier: tier
+          });
+        }
+      });
+
+      Object.entries(fundamentalRunes.weapon.striking.tiers).forEach(([tier, data]) => {
+        if (data.level <= level) {
+          runes.push({
+            id: `striking-${tier}`,
+            name: tier.charAt(0).toUpperCase() + tier.slice(1),
+            level: data.level,
+            price: data.price,
+            effect: data.bonus,
+            type: 'weapon',
+            category: 'striking',
+            url: fundamentalRunes.weapon.striking.url,
+            tier: tier
+          });
+        }
+      });
+    } else if (itemType === 'armor') {
+      Object.entries(fundamentalRunes.armor.potency.tiers).forEach(([tier, data]) => {
+        if (data.level <= level) {
+          runes.push({
+            id: `armor-potency-${tier}`,
+            name: `Armor Potency ${tier}`,
+            level: data.level,
+            price: data.price,
+            effect: data.bonus,
+            type: 'armor',
+            category: 'potency',
+            url: fundamentalRunes.armor.potency.url,
+            tier: tier
+          });
+        }
+      });
+
+      Object.entries(fundamentalRunes.armor.resilient.tiers).forEach(([tier, data]) => {
+        if (data.level <= level) {
+          runes.push({
+            id: `resilient-${tier}`,
+            name: tier.charAt(0).toUpperCase() + tier.slice(1),
+            level: data.level,
+            price: data.price,
+            effect: data.bonus,
+            type: 'armor',
+            category: 'resilient',
+            url: fundamentalRunes.armor.resilient.url,
+            tier: tier
+          });
+        }
       });
     }
 
-    // Weapon upgrades (runes)
-    if (level >= 2) {
-      suggestions.push({
-        type: 'enhancement',
-        item: '+1 Potency Rune',
-        reason: 'Add +1 to attack and damage rolls',
-        level: 2
-      });
-    }
-
-    if (level >= 4) {
-      suggestions.push({
-        type: 'enhancement',
-        item: 'Striking Rune',
-        reason: 'Increase weapon damage dice (doubles base damage)',
-        level: 4
-      });
-    }
-
-    if (level >= 10) {
-      suggestions.push({
-        type: 'enhancement',
-        item: '+2 Potency Rune',
-        reason: 'Upgrade to +2 for better attack bonus',
-        level: 10
-      });
-    }
-
-    return suggestions.filter(s => s.level <= level);
+    return runes.sort((a, b) => a.level - b.level);
   };
 
-  const suggestions = getEquipmentSuggestions();
+  // Equipment management functions
+  const equipItem = (itemData, slot) => {
+    // Unequip any item in the same slot
+    const newGear = gear.map(item => {
+      if (item.slot === slot && item.equipped) {
+        return { ...item, equipped: false };
+      }
+      return item;
+    });
+
+    // Check if item already exists in inventory
+    const existingItem = newGear.find(item => item.name === itemData.name);
+    if (existingItem) {
+      // Equip existing item
+      const updatedGear = newGear.map(item =>
+        item.id === existingItem.id ? { ...item, equipped: true, slot } : item
+      );
+      setGear(updatedGear);
+    } else {
+      // Add new item to gear and equip it
+      const newItem = {
+        id: Date.now(),
+        name: itemData.name,
+        equipped: true,
+        slot: slot,
+        type: itemData.category,
+        stats: itemData,
+        runes: { potency: null, striking: null, resilient: null, property: [] },
+        source: 'Equipment Database',
+        url: itemData.url || ''
+      };
+      setGear([...newGear, newItem]);
+    }
+    setSelectedSlot(null);
+  };
+
+  const unequipItem = (slot) => {
+    const updatedGear = gear.map(item =>
+      item.slot === slot && item.equipped ? { ...item, equipped: false } : item
+    );
+    setGear(updatedGear);
+  };
+
+  const addRuneToItem = (itemId, runeData) => {
+    const updatedGear = gear.map(item => {
+      if (item.id === itemId) {
+        const newRunes = { ...item.runes };
+
+        if (runeData.category === 'potency') {
+          newRunes.potency = runeData.tier;
+        } else if (runeData.category === 'striking') {
+          newRunes.striking = runeData.tier;
+        } else if (runeData.category === 'resilient') {
+          newRunes.resilient = runeData.tier;
+        }
+
+        return { ...item, runes: newRunes };
+      }
+      return item;
+    });
+    setGear(updatedGear);
+  };
+
+  const removeRuneFromItem = (itemId, runeCategory) => {
+    const updatedGear = gear.map(item => {
+      if (item.id === itemId) {
+        const newRunes = { ...item.runes };
+        newRunes[runeCategory] = null;
+        return { ...item, runes: newRunes };
+      }
+      return item;
+    });
+    setGear(updatedGear);
+  };
+
+  // Get available equipment by category
+  const getAvailableEquipment = (category) => {
+    const db = EQUIPMENT_DATABASE;
+    let items = [];
+
+    if (category === 'armor') {
+      items = Object.values(db.armor).filter(item =>
+        item.level <= level && (item.armorType === 'medium' || item.armorType === 'light')
+      );
+    } else if (category === 'weapons') {
+      items = Object.values(db.weapons).filter(item =>
+        item.level <= level
+      );
+    } else if (category === 'shields') {
+      items = Object.values(db.shields).filter(item =>
+        item.level <= level
+      );
+    }
+
+    return items;
+  };
 
   return (
     <div className="space-y-6">
+      {/* Wealth by Level Guide */}
+      <div className="bg-purple-900/30 rounded-lg p-4 border border-purple-700">
+        <h3 className="text-lg font-bold mb-3 text-purple-300 flex items-center gap-2">
+          <Coins className="w-5 h-5" />
+          Wealth Guidance for Level {level}
+          <Tooltip content={
+            <>
+              <div className="font-semibold text-purple-300 mb-2">Wealth by Level</div>
+              <div className="space-y-2 text-slate-300 text-sm">
+                <div className="bg-slate-700/50 p-2 rounded">
+                  <p className="mb-2">The Character Wealth table provides guidance for equipping characters starting at higher levels.</p>
+                  <p className="text-xs text-slate-400 italic">
+                    A single item on this table is always a baseline item. Property runes and precious materials must be purchased separately.
+                  </p>
+                </div>
+                <div className="bg-purple-900/50 p-2 rounded border border-purple-600">
+                  <div className="text-xs text-slate-400">
+                    Source: <a href={pathfinderRules.wealthByLevel.url} target="_blank" rel="noopener noreferrer"
+                      className="text-purple-400 hover:text-purple-300 inline-flex items-center gap-0.5">
+                      {pathfinderRules.wealthByLevel.source}
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </>
+          }>
+            <Info className="w-4 h-4 text-purple-400 hover:text-purple-300" />
+          </Tooltip>
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-slate-800/50 rounded p-3">
+            <div className="text-sm text-slate-400 mb-1">Permanent Items</div>
+            {wealthForLevel.permanentItems.length > 0 ? (
+              <div className="space-y-1">
+                {wealthForLevel.permanentItems.map((item, idx) => (
+                  <div key={idx} className="text-slate-200 flex items-center gap-2">
+                    <div className="w-1 h-1 bg-purple-400 rounded-full" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-slate-400 italic">None recommended at level 1</div>
+            )}
+          </div>
+          <div className="bg-slate-800/50 rounded p-3">
+            <div className="text-sm text-slate-400 mb-1">Currency</div>
+            <div className="text-2xl font-bold text-green-400">{wealthForLevel.currency}</div>
+            <div className="text-xs text-slate-400 mt-1">
+              Or lump sum: <span className="text-green-400">{wealthForLevel.lumpSum}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Available Runes Guide */}
+      <div className="bg-blue-900/30 rounded-lg p-4 border border-blue-700">
+        <h3 className="text-lg font-bold mb-3 text-blue-300 flex items-center gap-2">
+          <Sparkles className="w-5 h-5" />
+          Available Fundamental Runes (Level {level})
+          <Tooltip content={
+            <>
+              <div className="font-semibold text-blue-300 mb-2">Fundamental Runes</div>
+              <div className="space-y-2 text-slate-300 text-sm">
+                <div className="bg-slate-700/50 p-2 rounded">
+                  <p className="mb-2">Four fundamental runes produce the most essential magic of protection and destruction:</p>
+                  <ul className="space-y-1 text-xs">
+                    <li className="flex items-start gap-2">
+                      <div className="w-1 h-1 bg-blue-400 rounded-full mt-1.5" />
+                      <span><strong>Weapon Potency:</strong> Adds bonus to attack rolls</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-1 h-1 bg-blue-400 rounded-full mt-1.5" />
+                      <span><strong>Striking:</strong> Adds extra weapon damage dice</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-1 h-1 bg-blue-400 rounded-full mt-1.5" />
+                      <span><strong>Armor Potency:</strong> Increases AC bonus</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-1 h-1 bg-blue-400 rounded-full mt-1.5" />
+                      <span><strong>Resilient:</strong> Grants bonus to saving throws</span>
+                    </li>
+                  </ul>
+                  <p className="text-xs text-slate-400 italic mt-2">
+                    Potency runes are prerequisites for striking/resilient runes.
+                  </p>
+                </div>
+                <div className="bg-blue-900/50 p-2 rounded border border-blue-600">
+                  <div className="text-xs text-slate-400">
+                    Source: Player Core
+                  </div>
+                </div>
+              </div>
+            </>
+          }>
+            <Info className="w-4 h-4 text-blue-400 hover:text-blue-300" />
+          </Tooltip>
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Weapon Runes */}
+          <div className="bg-slate-800/50 rounded p-3">
+            <div className="font-semibold text-blue-200 mb-2 flex items-center gap-2">
+              <Sword className="w-4 h-4" />
+              Weapon Runes
+            </div>
+            <div className="space-y-2">
+              {availableRunes.filter(r => r.type === 'weapon').map((rune, idx) => (
+                <div key={idx} className="bg-slate-700/50 rounded p-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-semibold text-slate-200">{rune.name}</span>
+                    <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">Lvl {rune.level}</span>
+                  </div>
+                  <div className="text-xs text-green-400">{rune.effect}</div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs text-slate-400">{rune.price}</span>
+                    <a href={rune.url} target="_blank" rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 text-xs inline-flex items-center gap-0.5">
+                      View <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Armor Runes */}
+          <div className="bg-slate-800/50 rounded p-3">
+            <div className="font-semibold text-blue-200 mb-2 flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Armor Runes
+            </div>
+            <div className="space-y-2">
+              {availableRunes.filter(r => r.type === 'armor').map((rune, idx) => (
+                <div key={idx} className="bg-slate-700/50 rounded p-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-semibold text-slate-200">{rune.name}</span>
+                    <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">Lvl {rune.level}</span>
+                  </div>
+                  <div className="text-xs text-green-400">{rune.effect}</div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs text-slate-400">{rune.price}</span>
+                    <a href={rune.url} target="_blank" rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 text-xs inline-flex items-center gap-0.5">
+                      View <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Bulk Tracking */}
       <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
         <div className="flex items-center justify-between mb-2">
