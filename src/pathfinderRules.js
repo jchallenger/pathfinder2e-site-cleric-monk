@@ -882,6 +882,171 @@ export const pathfinderRules = {
     }
   },
 
+  // ==================== FUNDAMENTAL RUNES ====================
+  // Source: Player Core, Archives of Nethys
+  // Four fundamental runes produce the most essential magic of protection and destruction
+  fundamentalRunes: {
+    weapon: {
+      potency: {
+        name: "Weapon Potency",
+        description: "A weapon potency rune adds a bonus to a weapon's attack rolls",
+        source: "Player Core",
+        url: "https://2e.aonprd.com/Equipment.aspx?ID=281",
+        tiers: {
+          "+1": {
+            level: 2,
+            price: "35 gp",
+            bonus: "+1 item bonus to attack rolls",
+            description: "Etched onto a weapon, a weapon potency rune gives the weapon a +1 item bonus to attack rolls."
+          },
+          "+2": {
+            level: 10,
+            price: "935 gp",
+            bonus: "+2 item bonus to attack rolls",
+            description: "Increases the weapon's item bonus to attack rolls to +2."
+          },
+          "+3": {
+            level: 16,
+            price: "8,935 gp",
+            bonus: "+3 item bonus to attack rolls",
+            description: "Increases the weapon's item bonus to attack rolls to +3."
+          }
+        }
+      },
+      striking: {
+        name: "Striking",
+        description: "A striking rune adds extra weapon damage dice",
+        source: "Player Core",
+        url: "https://2e.aonprd.com/Equipment.aspx?ID=280",
+        tiers: {
+          striking: {
+            level: 4,
+            price: "65 gp",
+            bonus: "2 weapon damage dice",
+            description: "A striking rune stores destructive magic in the weapon, increasing the weapon damage dice it deals to two instead of one."
+          },
+          greaterStriking: {
+            level: 12,
+            price: "1,065 gp",
+            bonus: "3 weapon damage dice",
+            description: "Increases the weapon damage dice to three."
+          },
+          majorStriking: {
+            level: 19,
+            price: "31,065 gp",
+            bonus: "4 weapon damage dice",
+            description: "Increases the weapon damage dice to four."
+          }
+        }
+      }
+    },
+    armor: {
+      potency: {
+        name: "Armor Potency",
+        description: "An armor potency rune increases the armor's item bonus to AC",
+        source: "Player Core",
+        url: "https://2e.aonprd.com/Equipment.aspx?ID=278",
+        tiers: {
+          "+1": {
+            level: 5,
+            price: "160 gp",
+            bonus: "+1 item bonus to AC",
+            description: "Armor with this rune has a +1 item bonus to AC."
+          },
+          "+2": {
+            level: 11,
+            price: "1,060 gp",
+            bonus: "+2 item bonus to AC",
+            description: "Increases the armor's item bonus to AC to +2."
+          },
+          "+3": {
+            level: 18,
+            price: "20,560 gp",
+            bonus: "+3 item bonus to AC",
+            description: "Increases the armor's item bonus to AC to +3."
+          }
+        }
+      },
+      resilient: {
+        name: "Resilient",
+        description: "A resilient rune grants a bonus to the wearer's saving throws",
+        source: "Player Core",
+        url: "https://2e.aonprd.com/Equipment.aspx?ID=279",
+        tiers: {
+          resilient: {
+            level: 8,
+            price: "340 gp",
+            bonus: "+1 item bonus to all saving throws",
+            description: "Resilient runes imbue armor with additional protective magic. This grants you a +1 item bonus to saving throws."
+          },
+          greaterResilient: {
+            level: 14,
+            price: "3,440 gp",
+            bonus: "+2 item bonus to all saving throws",
+            description: "Increases the item bonus to saving throws to +2."
+          },
+          majorResilient: {
+            level: 20,
+            price: "49,440 gp",
+            bonus: "+3 item bonus to all saving throws",
+            description: "Increases the item bonus to saving throws to +3."
+          }
+        }
+      }
+    },
+    notes: "As you level up, you typically alternate between increasing an item's potency rune and its striking or resilient rune when you can afford to. A weapon potency rune is a prerequisite for adding striking runes, and an armor potency rune is a prerequisite for adding resilient runes."
+  },
+
+  // ==================== WEALTH BY LEVEL ====================
+  // Source: Player Core, Game Mastery Guide, Archives of Nethys
+  // Character Wealth table provides guidance for equipping new characters starting at higher levels
+  wealthByLevel: {
+    description: "A single item on this table is always a baseline item. Property runes and precious materials must be purchased separately.",
+    source: "Player Core",
+    url: "https://2e.aonprd.com/Rules.aspx?ID=587",
+    table: {
+      1: { permanentItems: [], currency: "15 gp", lumpSum: "15 gp" },
+      2: { permanentItems: ["1st: 1"], currency: "20 gp", lumpSum: "30 gp" },
+      3: { permanentItems: ["2nd: 1", "1st: 2"], currency: "25 gp", lumpSum: "75 gp" },
+      4: { permanentItems: ["3rd: 1", "2nd: 2", "1st: 1"], currency: "30 gp", lumpSum: "140 gp" },
+      5: { permanentItems: ["4th: 1", "3rd: 2", "2nd: 1", "1st: 2"], currency: "50 gp", lumpSum: "270 gp" },
+      6: { permanentItems: ["5th: 1", "4th: 2", "3rd: 1", "2nd: 2"], currency: "80 gp", lumpSum: "450 gp" },
+      7: { permanentItems: ["6th: 1", "5th: 2", "4th: 1", "3rd: 2"], currency: "125 gp", lumpSum: "720 gp" },
+      8: { permanentItems: ["7th: 1", "6th: 2", "5th: 1", "4th: 2"], currency: "180 gp", lumpSum: "1,100 gp" },
+      9: { permanentItems: ["8th: 1", "7th: 2", "6th: 1", "5th: 2"], currency: "250 gp", lumpSum: "1,600 gp" },
+      10: { permanentItems: ["9th: 1", "8th: 2", "7th: 1", "6th: 2"], currency: "350 gp", lumpSum: "2,300 gp" },
+      11: { permanentItems: ["10th: 1", "9th: 2", "8th: 1", "7th: 2"], currency: "500 gp", lumpSum: "3,200 gp" },
+      12: { permanentItems: ["11th: 1", "10th: 2", "9th: 1", "8th: 2"], currency: "700 gp", lumpSum: "4,500 gp" },
+      13: { permanentItems: ["12th: 1", "11th: 2", "10th: 1", "9th: 2"], currency: "1,000 gp", lumpSum: "6,400 gp" },
+      14: { permanentItems: ["13th: 1", "12th: 2", "11th: 1", "10th: 2"], currency: "1,500 gp", lumpSum: "9,300 gp" },
+      15: { permanentItems: ["14th: 1", "13th: 2", "12th: 1", "11th: 2"], currency: "2,250 gp", lumpSum: "13,500 gp" },
+      16: { permanentItems: ["15th: 1", "14th: 2", "13th: 1", "12th: 2"], currency: "3,250 gp", lumpSum: "20,000 gp" },
+      17: { permanentItems: ["16th: 1", "15th: 2", "14th: 1", "13th: 2"], currency: "5,000 gp", lumpSum: "30,000 gp" },
+      18: { permanentItems: ["17th: 1", "16th: 2", "15th: 1", "14th: 2"], currency: "7,500 gp", lumpSum: "45,000 gp" },
+      19: { permanentItems: ["18th: 1", "17th: 2", "16th: 1", "15th: 2"], currency: "12,000 gp", lumpSum: "69,000 gp" },
+      20: { permanentItems: ["19th: 1", "18th: 2", "17th: 1", "16th: 2"], currency: "20,000 gp", lumpSum: "112,000 gp" }
+    }
+  },
+
+  // ==================== ITEM LEVEL RULES ====================
+  // Source: Player Core, Archives of Nethys
+  itemLevelRules: {
+    description: "Item level helps measure the item's rarity and power. While characters can use items of any level, GMs should keep in mind that allowing characters access to items far above their current level may have a negative impact on the game.",
+    source: "Player Core",
+    url: "https://2e.aonprd.com/Rules.aspx?ID=185",
+    purchasing: {
+      general: "In a given settlement, a character can usually purchase any common item that is of the same or lower level than the settlement's level.",
+      startingAtHigherLevel: "If you choose, you can allow the player to start with a lump sum of currency and buy whatever common items they want, with a maximum item level of 1 lower than the character's level.",
+      rarity: "Items with an uncommon rarity can be purchased only if you have special access from abilities you selected during character creation or your GM gives you permission to purchase them."
+    },
+    settlementLevel: {
+      village: "Level 1",
+      town: "Level 3-4",
+      city: "Level 8-10",
+      metropolis: "Level 14-16"
+    }
+  },
+
   // ==================== MONK CLASS (Full Class) ====================
   // Source: Player Core, Archives of Nethys
   monkClass: {
