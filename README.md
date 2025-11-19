@@ -1,56 +1,74 @@
 # Talon Tracker
 
-A comprehensive **Pathfinder 2e Remaster character sheet web application** for tracking "Briggeld of Igoria" - a Minotaur Warpriest Cleric with Dragonblood Heritage.
+A comprehensive **Pathfinder 2e Remaster character sheet web application** for tracking "Generic Cleric" - a Minotaur Warpriest Cleric with Dragonblood Heritage.
 
-![Version](https://img.shields.io/badge/version-3.0.0-purple)
+![Version](https://img.shields.io/badge/version-4.0.0-purple)
 ![PF2e](https://img.shields.io/badge/Pathfinder-2e%20Remaster-red)
 ![React](https://img.shields.io/badge/React-19.1.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+## 📸 Screenshots
+
+<div align="center">
+
+| Overview Tab | Combat Tab | Spells Tab |
+|:---:|:---:|:---:|
+| ![Overview](docs/screenshots/ui/screenshot-character.png) | ![Combat](docs/screenshots/ui/screenshot-combat.png) | ![Spells](docs/screenshots/ui/screenshot-spells.png) |
+| Character identity, abilities, skills | AC, attacks, saves, combat stats | PF2e spell preparation system |
+
+</div>
+
+> **Test Results**: See [docs/screenshots/test-results/](docs/screenshots/test-results/) for Playwright test screenshots
+
 ## ✨ Features
 
-### 📊 Character Management
-- **Complete Character Sheet** - All stats, abilities, and attributes
-- **Level Progression** - Track advancement from level 1-20
-- **Ability Scores** - Automatic calculation with 18+ cap rule
-- **Hit Points** - Dynamic HP tracking with damage/healing
+### 🎨 Modern Tab-Based Interface
+- **Six Dedicated Tabs** - Overview, Combat, Spells, Feats/Skills, Progression, Gear
+- **Shared Component Library** - Consistent UI/UX across all tabs
+- **Responsive Design** - Purple/slate theme with Tailwind CSS
+- **Accessibility** - ARIA labels, keyboard navigation, screen reader support
 
-### ⚔️ Combat System
-- **Attack Rolls** - All weapon attacks with bonuses
-- **Armor Class** - Complete AC calculation with equipment bonuses
-- **Saving Throws** - Fortitude, Reflex, and Will saves
-- **Equipment Bonuses** - Traceable stat modifiers from all gear
+### 📊 Overview Tab
+- **Character Identity** - Name, ancestry, heritage, background
+- **Ability Scores** - All 6 abilities with modifiers, visual boost tracking
+- **Skills** - All 17 PF2e skills with proficiency ranks
+- **Pathbuilder Integration** - Import/export character data to/from Pathbuilder 2e JSON
 
-### 🎒 Equipment Tracking
-- **Comprehensive Database** - 21+ items with full PF2e stats
-- **Bulk System** - Visual carrying capacity with encumbrance warnings
-- **Stat Modifiers** - All equipment bonuses displayed with sources
-- **Enhanced Tooltips** - Hover for complete item details
-- **Rune Support** - Weapon and armor enhancement runes
+### ⚔️ Combat Tab
+- **Armor Class** - Complete AC calculation with equipment bonuses and tooltips
+- **Attacks** - Unarmed strikes (Fist, Horns) with attack/damage breakdowns
+- **Saving Throws** - Fortitude, Reflex, Will with proficiency progression
+- **Spell DC & Attack** - Spellcasting statistics
+- **Real-time Updates** - All stats update based on level and equipment
 
-### ✨ Spell Management
-- **Divine Spellcasting** - Full Cleric spell progression
-- **Multiple Preparations** - Prepare same spell multiple times
-- **Spell Slots** - Visual slot management per rank
-- **Divine Font** - Heal/Harm font tracking (4-6 slots)
-- **Cantrips** - Unlimited casting
+### ✨ Spells Tab (PF2e-Compliant)
+- **Prepared Spellcasting** - Official PF2e prepared spell rules
+- **Individual Instance Tracking** - Prepare same spell multiple times
+- **Divine Font** - Heal/Harm choice with separate slot pool (4-6 slots)
+- **Spell Browser** - Search and filter divine spells
+- **Spell Cards** - Detailed spell information with heightening effects
+- **Source Attribution** - All spells link to Archives of Nethys
 
-### 🎯 Feats & Skills
-- **Interactive Feat Picker** - Modal selection with search
-- **Skill Progression** - Increase proficiency ranks
-- **Story Integration** - AI narrator for feat/skill gains
-- **Source Tracking** - Shows where each feat/skill came from
+### 🎯 Feats & Skills Tab
+- **Three-Way View** - By Level, Skills, Feats
+- **Skill Proficiencies** - All 17 skills with rank increases
+- **Feat Browser** - Filter by type (ancestry, class, skill, general)
+- **Prerequisite Validation** - Shows available feats based on character
+- **Level Progression** - See all upgrades gained at each level
 
-### 📖 AI Storytelling
-- **Ollama Integration** - Uses Llama 3.2 for narrative generation
-- **Action Batching** - Combines multiple actions into coherent narratives
-- **Story Log** - Persistent campaign journal
-- **Context Aware** - Includes character state, HP, equipment
+### 📈 Progression Tab
+- **Level Timeline** - Visual progression from 1-20
+- **Ability Boosts** - Track boosts at levels 5, 10, 15, 20
+- **Proficiency Progression** - See when skills/weapons/saves increase
+- **Class Features** - All Warpriest features by level
+- **Milestone Markers** - Highlight important levels (5, 10, 15, 20)
 
-### 📝 Notes & Progression
-- **Campaign Notes** - Session tracking and campaign journal
-- **Level Milestones** - Automatic feat/skill/ability unlocks
-- **Character Avatar** - AI-generated character portraits (optional)
+### 🎒 Gear Tab
+- **Equipment Slots** - Weapon, armor, shield management
+- **Rune System** - Add/upgrade fundamental and property runes
+- **Equipment Browser** - Filter by category and level
+- **Stat Impact** - Real-time display of equipment bonuses
+- **Bulk Tracking** - Visual carrying capacity (coming soon)
 
 ## 🚀 Live Demo
 
@@ -153,22 +171,37 @@ netlify deploy --prod --dir=dist
 ```
 talon-tracker/
 ├── src/
-│   ├── App.jsx                  # Main application (all components)
-│   ├── pathfinderRules.js       # Official PF2e rules cache
-│   ├── characterConfig.js       # Character configuration & data
-│   ├── characterFunctions.test.js  # Unit tests (100 tests)
+│   ├── App.jsx                  # Main application & state management
+│   ├── pathfinderRules.js       # Official PF2e rules cache with URLs
+│   ├── characterConfig.js       # Character data and progression
+│   ├── pathbuilderUtils.js      # Pathbuilder import/export utilities
+│   ├── sharedComponents.jsx     # Shared component library (15 components)
+│   ├── components/shared/       # Additional shared components
+│   │   ├── Tooltip.jsx          # Reusable tooltip with accessibility
+│   │   ├── Modal.jsx            # Modal dialogs
+│   │   ├── StatBlock.jsx        # Stat containers
+│   │   ├── Badge.jsx            # Label badges
+│   │   └── index.js             # Component exports
+│   ├── NewOverviewTab.jsx       # Character identity & skills tab
+│   ├── NewCombatTab.jsx         # Combat stats tab
+│   ├── NewSpellsTab.jsx         # Spell management tab
+│   ├── NewFeatsSkillsTab.jsx    # Feats & skills tab
+│   ├── NewProgressionTab.jsx    # Level progression tab
+│   ├── NewGearTab.jsx           # Equipment management tab
 │   ├── main.jsx                 # React entry point
 │   └── index.css                # Global Tailwind styles
-├── test-ui.js                   # Playwright UI tests
-├── .continue/                   # Continue extension config
-│   ├── config.json              # Ollama API configuration
-│   ├── README.md                # Continue documentation
-│   └── QUICK_START.md           # Quick start guide
-├── CLAUDE.md                    # AI agent instructions
+├── docs/
+│   ├── screenshots/
+│   │   ├── ui/                  # UI screenshots
+│   │   └── test-results/        # Playwright test screenshots
+│   └── archive/                 # Archived documentation
+├── test-ui.js                   # Main Playwright UI tests
+├── test-*-tab.cjs               # Individual tab tests
+├── CLAUDE.md                    # AI agent instructions (26KB)
+├── TAB_DESIGN_REVIEW.md         # Comprehensive design review
 ├── CHARACTER_AUDIT.md           # Rules compliance audit
 ├── COMPLIANCE_FIXES.md          # Applied fixes log
-├── EQUIPMENT_AND_TRACKING_ENHANCEMENTS.md  # Equipment system docs
-├── FUNCTION_DOCUMENTATION.md    # All function documentation
+├── SPELL_PREPARATION_REVIEW.md  # PF2e spell rules explanation
 ├── netlify.toml                 # Netlify configuration
 └── package.json                 # Dependencies & scripts
 ```
@@ -233,13 +266,24 @@ See [.continue/QUICK_START.md](.continue/QUICK_START.md) for usage guide.
 
 ## 📖 Documentation
 
-- **[CLAUDE.md](CLAUDE.md)** - AI agent instructions and project overview
-- **[CHARACTER_AUDIT.md](CHARACTER_AUDIT.md)** - Rules compliance audit
-- **[COMPLIANCE_FIXES.md](COMPLIANCE_FIXES.md)** - Bug fixes applied
-- **[EQUIPMENT_AND_TRACKING_ENHANCEMENTS.md](EQUIPMENT_AND_TRACKING_ENHANCEMENTS.md)** - Equipment system documentation
+### Core Documentation
+- **[CLAUDE.md](CLAUDE.md)** - Complete AI agent instructions and project overview (26KB)
+- **[TAB_DESIGN_REVIEW.md](TAB_DESIGN_REVIEW.md)** - Comprehensive design review with roadmap
+- **[CHARACTER_AUDIT.md](CHARACTER_AUDIT.md)** - Pre-fix rules compliance audit
+- **[COMPLIANCE_FIXES.md](COMPLIANCE_FIXES.md)** - All applied fixes with before/after
+
+### Rules & Systems
+- **[SPELL_PREPARATION_REVIEW.md](SPELL_PREPARATION_REVIEW.md)** - Official PF2e spell rules explanation
+- **[RULES_CACHE_SUMMARY.md](RULES_CACHE_SUMMARY.md)** - Documentation of pathfinderRules.js
+- **[MINOTAUR_CLERIC_CHARACTER_SHEET.md](MINOTAUR_CLERIC_CHARACTER_SHEET.md)** - Character reference
+
+### Technical
 - **[FUNCTION_DOCUMENTATION.md](FUNCTION_DOCUMENTATION.md)** - All function documentation
-- **[.continue/README.md](.continue/README.md)** - Continue extension guide
-- **[.continue/QUICK_START.md](.continue/QUICK_START.md)** - Quick start for Continue
+- **[src/components/shared/README.md](src/components/shared/README.md)** - Shared components guide
+- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Deployment instructions
+
+### Archived
+- **[docs/archive/session-summaries/](docs/archive/session-summaries/)** - Historical session logs
 
 ## 🎯 Rules Compliance
 
@@ -257,14 +301,28 @@ All character calculations are **verified against official Pathfinder 2e Remaste
 - Avatar generation requires OpenAI-compatible image API
 - Some equipment needs manual entry (not in database)
 
-## 🚀 Future Enhancements
+## 🚀 Roadmap
 
-- [ ] More equipment in database
-- [ ] Wealth tracking (gold/silver/copper)
-- [ ] Container items (backpacks, bags of holding)
-- [ ] Shield damage tracking
-- [ ] Dex cap enforcement in AC
-- [ ] Equipment comparison tool
+See **[TAB_DESIGN_REVIEW.md](TAB_DESIGN_REVIEW.md)** for detailed implementation roadmap.
+
+### High Priority
+- [ ] Migrate all tabs to use shared components
+- [ ] Implement prerequisite validation in FeatsSkillsTab
+- [ ] Add shield raise toggle in CombatTab
+- [ ] Add spell filtering and favorites in SpellsTab
+- [ ] Add ability boost allocation UI in ProgressionTab
+
+### Medium Priority
+- [ ] Bulk tracking in GearTab
+- [ ] Concentration tracker in SpellsTab
+- [ ] Feat recommendation system
+- [ ] Mobile responsiveness improvements
+- [ ] Performance optimization (memoization, virtual scrolling)
+
+### Low Priority
+- [ ] Visual enhancements (icons, animations)
+- [ ] Spell history tracking
+- [ ] Printable character sheets
 - [ ] Multiple character support
 - [ ] Export character to PDF
 

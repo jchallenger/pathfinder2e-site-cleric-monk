@@ -12,7 +12,18 @@
       "Read(*.md)",
       "Read(src/**)",
       "Edit(src/**)",
-      "Write(*.md)"
+      "Write(*.md)",
+      "Bash(git push)",
+      "Bash(node test-gear-tab.js:*)",
+      "Bash(move test-gear-tab.js test-gear-tab.cjs)",
+      "Bash(node test-gear-tab.cjs:*)",
+      "Bash(node test-combat-tab.cjs:*)",
+      "Bash(timeout:*)",
+      "Bash(nul)",
+      "Bash(node test-spells-tab.cjs:*)",
+      "Bash(node test-feats-skills-tab.cjs:*)",
+      "Bash(node test-progression-tab.cjs:*)",
+      "Bash(node test-spells-refactor.cjs)"
     ],
     "deny": [
       "Bash(rm -rf:*)",
