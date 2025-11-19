@@ -24,8 +24,8 @@ async function testUI() {
     });
 
     // Navigate to app
-    console.log('📍 Navigating to http://localhost:5173...');
-    await page.goto('http://localhost:5173', { waitUntil: 'networkidle' });
+    console.log('📍 Navigating to http://localhost:5174...');
+    await page.goto('http://localhost:5174', { waitUntil: 'networkidle' });
 
     // Wait for React to mount - check for content in #root
     console.log('⏳ Waiting for React to mount...');
@@ -62,9 +62,9 @@ async function testUI() {
 
     // Test 1: Check header is present
     console.log('\n✅ Test 1: Verify header');
-    const header = await page.locator('h1:has-text("Generic Cleric")');
+    const header = await page.locator('h1:has-text("Briggeld of Igoria")');
     await header.waitFor({ timeout: 10000 });
-    console.log('   ✓ Header found: "Generic Cleric"');
+    console.log('   ✓ Header found: "Briggeld of Igoria"');
 
     const subtitle = await page.locator('text=Minotaur Warpriest (Dragonblood)');
     await subtitle.waitFor({ timeout: 5000 });
@@ -287,10 +287,10 @@ async function testUI() {
     }
 
     // Check if avatar image appeared or if still showing placeholder
-    const avatarImage = await page.locator('img[alt="Generic Cleric"]').count();
+    const avatarImage = await page.locator('img[alt="Briggeld of Igoria"]').count();
     if (avatarImage > 0) {
       console.log('   ✓ Avatar image generated successfully');
-      const imgSrc = await page.locator('img[alt="Generic Cleric"]').getAttribute('src');
+      const imgSrc = await page.locator('img[alt="Briggeld of Igoria"]').getAttribute('src');
       console.log(`   ✓ Image source: ${imgSrc?.substring(0, 80)}...`);
     } else {
       console.log('   ⚠️  Avatar image not found - generation may have failed');
